@@ -20,10 +20,26 @@ import time
 
 import cliff.command
 import requests
+import stevedore.driver
 
 
 class RiverFlow(cliff.command.Command):
     """Get EC river flow data and output daily average value(s) for SOG.
+    """
+    log = logging.getLogger(__name__)
+
+    def take_action(self, parsed_args):
+        read_mgr = stevedore.driver.DriverManager(
+            namespace='ecget.get_data',
+            name='river_data',
+            invoke_on_load=True,
+        )
+        read_mgr.driver.get_data()
+
+
+class RiverData(object):
+    """ECget driver to get river data from Environment Canada
+    wateroffice.ec.gc.ca site.
     """
     DISCLAIMER_URL = 'http://www.wateroffice.ec.gc.ca/include/disclaimer.php'
     DISCLAIMER_ACTION = 'I Agree'
@@ -43,10 +59,7 @@ class RiverFlow(cliff.command.Command):
         'eday': 2,
     }
 
-    def take_action(self, parsed_args):
-        self._get_river_data(parsed_args)
-
-    def _get_river_data(self, parsed_args):
+    def get_data(self):
         with requests.session() as s:
             s.post(self.DISCLAIMER_URL, data=self.DISCLAIMER_ACTION)
             time.sleep(2)

@@ -48,6 +48,7 @@ except IOError:
 install_requires = [
     # see requirements.txt for versions most recently used in development
     'cliff',
+    'requests',
 ]
 
 setup(

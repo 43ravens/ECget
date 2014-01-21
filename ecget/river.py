@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import abc
 import logging
 import time
 
@@ -31,38 +32,58 @@ class RiverFlow(cliff.command.Command):
     def take_action(self, parsed_args):
         read_mgr = stevedore.driver.DriverManager(
             namespace='ecget.get_data',
-            name='river_data',
+            name='river.discharge',
             invoke_on_load=True,
         )
         read_mgr.driver.get_data()
 
 
-class RiverData(object):
-    """ECget driver to get river data from Environment Canada
-    wateroffice.ec.gc.ca site.
+class RiverDataBase(object):
+    """Base class for EC river data site drivers.
     """
+    __metaclass__ = abc.ABCMeta
+
     DISCLAIMER_URL = 'http://www.wateroffice.ec.gc.ca/include/disclaimer.php'
-    DISCLAIMER_ACTION = 'I Agree'
+    DISCLAIMER_ACTION = {'disclaimer_action': 'I Agree'}
     DATA_URL = 'http://www.wateroffice.ec.gc.ca/graph/graph_e.html'
-
-    log = logging.getLogger(__name__)
-
-    params = {
-        'mode': 'text',
-        'prm1': 6,  # discharge
-        'station_id': '08MF005',
-        'syr': 2014,
-        'smo': 1,
-        'sday': 1,
-        'eyr': 2014,
-        'emo': 1,
-        'eday': 2,
+    PARAM_IDS = {
+        'discharge': 6,
     }
 
+    def __init__(self, param):
+        self.params = {
+            'mode': 'text',
+            'prm1': self.PARAM_IDS[param],
+        }
+
+    @abc.abstractmethod
     def get_data(self):
+        """
+        """
+
+
+class RiverDischarge(RiverDataBase):
+    """ECget driver to get river discharge data from Environment Canada
+    wateroffice.ec.gc.ca site.
+    """
+    log = logging.getLogger(__name__)
+
+    def __init__(self):
+        super(RiverDischarge, self).__init__('discharge')
+
+    def get_data(self):
+        self.params.update({
+            'stn': '08MF005',
+            'syr': 2014,
+            'smo': 1,
+            'sday': 1,
+            'eyr': 2014,
+            'emo': 1,
+            'eday': 2,
+        })
         with requests.session() as s:
             s.post(self.DISCLAIMER_URL, data=self.DISCLAIMER_ACTION)
             time.sleep(2)
             response = s.get(self.DATA_URL, params=self.params)
         self.log.debug('got river data')
-        self.log.info(response.headers)
+        self.log.info(response.text)

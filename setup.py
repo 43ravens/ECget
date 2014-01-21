@@ -76,7 +76,7 @@ setup(
             'river flow = ecget.river:RiverFlow',
         ],
         'ecget.get_data': [
-            'river_data = ecget.river:RiverData',
+            'river.discharge = ecget.river:RiverDischarge',
         ],
     },
 )

@@ -41,12 +41,30 @@ Thanks to `Richard Jones`_ for those commands.
 
 .. _Richard Jones: http://www.mechanicalcat.net/richard/log/Python/Python_3_3_and_virtualenv
 
-After cloning the soruce code repo from the `Bitbucket project`_,
+After cloning the source code repo from the `Bitbucket project`_,
 the Python packages at the versions used for development at tip can be installed with:
 
 .. code-block:: bash
 
     (ecget)$ pip install -r requirements.txt
+
+Install the ECget package for development with:
+
+.. code-block:: bash
+
+    (ecget)$ cd ecget
+    (ecget)$ pip install -e .
+
+or
+
+.. code-block:: bash
+
+    (ecget)$ cd ecget
+    (ecget)$ python setup.py develop
+
+.. note::
+
+    Because ECget uses setuptools entry points for plug-in discovery it is necessary to install the package whenever entry points are changed or added in :file:`setup.py`.
 
 
 Building Documentation

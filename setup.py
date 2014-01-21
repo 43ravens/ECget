@@ -73,6 +73,7 @@ setup(
             'ecget = ecget.main:main',
         ],
         'ecget.app': [
+            'river flow = ecget.river:RiverFlow',
         ],
     },
 )

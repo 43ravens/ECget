@@ -19,6 +19,7 @@ import abc
 import logging
 import time
 
+import arrow
 import cliff.command
 import requests
 import stevedore.driver
@@ -35,7 +36,8 @@ class RiverFlow(cliff.command.Command):
             name='river.discharge',
             invoke_on_load=True,
         )
-        read_mgr.driver.get_data()
+        read_mgr.driver.get_data(
+            '08MF005', arrow.get(2014, 1, 1), arrow.get(2014, 1, 1))
 
 
 class RiverDataBase(object):
@@ -57,8 +59,21 @@ class RiverDataBase(object):
         }
 
     @abc.abstractmethod
-    def get_data(self):
-        """
+    def get_data(self, station_id, start_date, end_date):
+        """Get river data from the Environment Canada wateroffice.ec.gc.ca
+        site.
+
+        :arg station_id: Station id
+                         - see http://www.wateroffice.ec.gc.ca/text_search/search_e.html.
+        :type station_id: str
+
+        :arg start_date: First date to get data for.
+        :type start_date: :py:class:`arrow.Arrow` instance
+
+        :arg end_date: Last date to get data for.
+        :type end_date: :py:class:`arrow.Arrow` instance
+
+        :returns:
         """
 
 
@@ -71,19 +86,34 @@ class RiverDischarge(RiverDataBase):
     def __init__(self):
         super(RiverDischarge, self).__init__('discharge')
 
-    def get_data(self):
+    def get_data(self, station_id, start_date, end_date):
+        """Get river data from the Environment Canada wateroffice.ec.gc.ca
+        site.
+
+        :arg station_id: Station id
+                         - see http://www.wateroffice.ec.gc.ca/text_search/search_e.html.
+        :type station_id: str
+
+        :arg start_date: First date to get data for.
+        :type start_date: :py:class:`arrow.Arrow` instance
+
+        :arg end_date: Last date to get data for.
+        :type end_date: :py:class:`arrow.Arrow` instance
+
+        :returns:
+        """
+        last_date = end_date.replace(days=1)
         self.params.update({
-            'stn': '08MF005',
-            'syr': 2014,
-            'smo': 1,
-            'sday': 1,
-            'eyr': 2014,
-            'emo': 1,
-            'eday': 2,
+            'stn': station_id,
+            'syr': start_date.year,
+            'smo': start_date.month,
+            'sday': start_date.day,
+            'eyr': last_date.year,
+            'emo': last_date.month,
+            'eday': last_date.day,
         })
         with requests.session() as s:
             s.post(self.DISCLAIMER_URL, data=self.DISCLAIMER_ACTION)
             time.sleep(2)
             response = s.get(self.DATA_URL, params=self.params)
-        self.log.debug('got river data')
         self.log.info(response.text)

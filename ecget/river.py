@@ -36,8 +36,16 @@ class RiverFlow(cliff.command.Command):
             name='river.discharge',
             invoke_on_load=True,
         )
+        station_id = '08MF005'
+        start_date = arrow.get(2014, 1, 1)
+        end_date = arrow.get(2014, 1, 1)
         read_mgr.driver.get_data(
-            '08MF005', arrow.get(2014, 1, 1), arrow.get(2014, 1, 1))
+            station_id, start_date, end_date)
+        msg = ('got {} river discharge data for {}'
+               .format(station_id, start_date.format('YYYY-MM-DD')))
+        if start_date != end_date:
+            msg += ' to {}'.format(end_date.format('YYYY-MM-DD'))
+        self.log.debug(msg)
 
 
 class RiverDataBase(object):

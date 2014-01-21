@@ -33,6 +33,7 @@ except IOError:
     long_description = ''
 install_requires = [
     # see requirements.txt for versions most recently used in development
+    'cliff',
 ]
 
 setup(

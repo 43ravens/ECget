@@ -4,11 +4,13 @@ Jinja2==2.7.2
 MarkupSafe==0.18
 Pygments==1.6
 Sphinx==1.2.1
+arrow==0.4.2
 cliff==1.5.2
 cmd2==0.6.7
 docutils==0.11
 prettytable==0.7.2
 pyparsing==2.0.1
+python-dateutil==2.2
 requests==2.2.0
 six==1.5.2
 stevedore==0.13

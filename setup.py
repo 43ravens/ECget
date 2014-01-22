@@ -71,14 +71,21 @@ setup(
     include_package_data=True,
     zip_safe=False,
     entry_points={
+        # The ecget command:
         'console_scripts': [
             'ecget = ecget.main:main',
         ],
+        # Sub-command plug-ins:
         'ecget.app': [
             'river flow = ecget.river:RiverFlow',
         ],
+        # Data getter drivers:
         'ecget.get_data': [
             'river.discharge = ecget.river:RiverDischarge',
+        ],
+        # Output formatters:
+        'ecget.formatter': [
+            'river.daily_avg_flow = ecget.SOG_formatters:DailyValue',
         ],
     },
 )

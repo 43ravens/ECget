@@ -43,18 +43,15 @@ class RiverFlow(cliff.command.Command):
             parsed_args.end_date,
         )
         daily_avgs = self._process_data(raw_data, parsed_args.end_date)
+        self._output_results(daily_avgs)
 
     def _get_data(self, station_id, start_date, end_date):
-        read_mgr = stevedore.driver.DriverManager(
+        mgr = stevedore.driver.DriverManager(
             namespace='ecget.get_data',
             name='river.discharge',
             invoke_on_load=True,
         )
-        raw_data = read_mgr.driver.get_data(
-            station_id,
-            start_date,
-            end_date,
-        )
+        raw_data = mgr.driver.get_data(station_id, start_date, end_date)
         msg = ('got {} river discharge data for {}'
                .format(station_id,
                        start_date.format('YYYY-MM-DD')))
@@ -99,6 +96,15 @@ class RiverFlow(cliff.command.Command):
         except ValueError:
             # Ignore training `*`
             return float(flow_string[:-1])
+
+    def _output_results(self, daily_avgs):
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.formatter',
+            name='river.daily_avg_flow',
+            invoke_on_load=True,
+        )
+        for chunk in mgr.driver.format(daily_avgs):
+            print(chunk, end='')
 
 
 class RiverDataBase(object):

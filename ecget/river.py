@@ -28,11 +28,16 @@ import stevedore.driver
 
 class RiverFlow(cliff.command.Command):
     """Get EC river flow data and output daily average value(s) for SOG.
+
+    ECget command plug-in.
     """
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(RiverFlow, self).get_parser(prog_name)
+        parser.description = (
+            'Get EC river flow data and output daily average value(s) for SOG.'
+        )
         parser.add_argument(
             'station_id',
             help=('EC station id of river to get data for; '

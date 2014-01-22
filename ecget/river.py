@@ -64,7 +64,7 @@ class RiverFlow(cliff.command.Command):
             parsed_args.start_date,
             parsed_args.end_date,
         )
-        daily_avgs = self._process_data(raw_data, parsed_args.end_date)
+        daily_avgs = self._calc_daily_avgs(raw_data, parsed_args.end_date)
         self._output_results(daily_avgs)
 
     def _get_data(self, station_id, start_date, end_date):
@@ -82,13 +82,15 @@ class RiverFlow(cliff.command.Command):
         self.log.debug(msg)
         return raw_data
 
-    def _process_data(self, raw_data, end_date):
+    def _calc_daily_avgs(self, raw_data, end_date):
         tds = raw_data.findAll('td')
         timestamps = (td.string for td in tds[::2])
         flows = (td.text for td in tds[1::2])
         data_day = self._read_datestamp(tds[0].string)
         flow_sum = count = 0
         daily_avgs = []
+        msg = (
+            'calculated average flow for {data_day} from {count} observations')
         for timestamp, flow in zip(timestamps, flows):
             datestamp = self._read_datestamp(timestamp)
             if datestamp > end_date.date():
@@ -98,10 +100,12 @@ class RiverFlow(cliff.command.Command):
                 count += 1
             else:
                 daily_avgs.append((data_day, flow_sum / count))
+                self.log.debug(msg.format(data_day=data_day, count=count))
                 data_day = datestamp
                 flow_sum = self._convert_flow(flow)
                 count = 1
         daily_avgs.append((data_day, flow_sum / count))
+        self.log.debug(msg.format(data_day=data_day, count=count))
         return daily_avgs
 
     def _read_datestamp(self, string):

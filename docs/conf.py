@@ -11,13 +11,14 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import os
+import sys
 
-import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -45,19 +46,16 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'ECget'
-copyright = '2014, Doug Latornell'
+import __pkg_metadata__
+project = __pkg_metadata__.PROJECT
+copyright = '2014, Doug Latornell and The University of British Columbia'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = subprocess.check_output([
-    'sh', '-c',
-    'cd ../; python setup.py --version',
-], universal_newlines=True)
-version = version.strip()
+version = __pkg_metadata__.VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 

@@ -19,17 +19,14 @@ from setuptools import (
     setup,
 )
 
-
-PROJECT = 'ECget'
-VERSION = '0.1'
-DEV_STATUS = '2 - Pre-Alpha'
+import __pkg_metadata__
 
 
 python_classifiers = [
     'Programming Language :: Python :: {0}'.format(py_version)
     for py_version in ['2', '2.7', '3', '3.2', '3.3']]
 other_classifiers = [
-    'Development Status :: ' + DEV_STATUS,
+    'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
     'Programming Language :: Python :: Implementation :: CPython',
     'Operating System :: MacOS :: MacOS X',
@@ -54,9 +51,9 @@ install_requires = [
 ]
 
 setup(
-    name=PROJECT,
-    version=VERSION,
-    description='Get Environment Canada Weather & Hydrometric Data',
+    name=__pkg_metadata__.PROJECT,
+    version=__pkg_metadata__.VERSION,
+    description=__pkg_metadata__.DESCRIPTION,
     long_description=long_description,
     author='Doug Latornell',
     author_email='djl@douglatornell.ca',

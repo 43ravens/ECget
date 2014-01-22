@@ -1,6 +1,9 @@
-"""ECget application
+"""ECget application.
 
-The ecget command runs this module.
+Get Environment Canada weather & hydrometric data.
+
+This module is connected to the `ecget` command via a console_scripts
+entry point in setup.py.
 
 Copyright 2014 Doug Latornell and The University of British Columbia
 
@@ -17,17 +20,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import sys
+
 import cliff.app
 import cliff.commandmanager
+
+import __pkg_metadata__
 
 
 class ECgetApp(cliff.app.App):
     def __init__(self):
         super(ECgetApp, self).__init__(
-            # TODO: Need a DRY way to get description and version here
-            #       and in setup.py
-            description='Get Environment Canada Weather & Hydrometric Data',
-            version='0.1',
+            description=__pkg_metadata__.DESCRIPTION,
+            version=__pkg_metadata__.VERSION,
             command_manager=cliff.commandmanager.CommandManager('ecget.app'),
         )
 

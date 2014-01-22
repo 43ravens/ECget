@@ -31,12 +31,30 @@ class RiverFlow(cliff.command.Command):
     """
     log = logging.getLogger(__name__)
 
+    def get_parser(self, prog_name):
+        parser = super(RiverFlow, self).get_parser(prog_name)
+        parser.add_argument(
+            'station_id',
+            help=('EC station id of river to get data for; '
+                  'see http://www.wateroffice.ec.gc.ca/text_search/'
+                  'search_e.html.'),
+        )
+        parser.add_argument(
+            'start_date',
+            type=arrow.get,
+            help='first date to get data for; YYYY-MM-DD',
+        )
+        parser.add_argument(
+            '-e', '--end-date',
+            type=arrow.get,
+            help='last date to get data for; YYYY-MM-DD.'
+                 'Defaults to start date.',
+        )
+        return parser
+
     def take_action(self, parsed_args):
-
-        parsed_args.station_id = '08MF005'
-        parsed_args.start_date = arrow.get(2014, 1, 1)
-        parsed_args.end_date = arrow.get(2014, 1, 1)
-
+        if parsed_args.end_date is None:
+            parsed_args.end_date = parsed_args.start_date
         raw_data = self._get_data(
             parsed_args.station_id,
             parsed_args.start_date,

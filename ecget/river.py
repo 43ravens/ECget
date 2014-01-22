@@ -15,7 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import abc
 import logging
 import time
 
@@ -133,8 +132,6 @@ class RiverFlow(cliff.command.Command):
 class RiverDataBase(object):
     """Base class for EC river data site drivers.
     """
-    __metaclass__ = abc.ABCMeta
-
     DISCLAIMER_URL = 'http://www.wateroffice.ec.gc.ca/include/disclaimer.php'
     DISCLAIMER_ACTION = {'disclaimer_action': 'I Agree'}
     DATA_URL = 'http://www.wateroffice.ec.gc.ca/graph/graph_e.html'
@@ -148,41 +145,12 @@ class RiverDataBase(object):
             'prm1': self.PARAM_IDS[param],
         }
 
-    @abc.abstractmethod
     def get_data(self, station_id, start_date, end_date):
         """Get river data from the Environment Canada wateroffice.ec.gc.ca
         site.
 
         :arg station_id: Station id
-                         - see http://www.wateroffice.ec.gc.ca/text_search/search_e.html.
-        :type station_id: str
-
-        :arg start_date: First date to get data for.
-        :type start_date: :py:class:`arrow.Arrow` instance
-
-        :arg end_date: Last date to get data for.
-        :type end_date: :py:class:`arrow.Arrow` instance
-
-        :returns: BeautifulSoup parser object containing data table
-                  from EC page.
-        """
-
-
-class RiverDischarge(RiverDataBase):
-    """ECget driver to get river discharge data from Environment Canada
-    wateroffice.ec.gc.ca site.
-    """
-    log = logging.getLogger(__name__)
-
-    def __init__(self):
-        super(RiverDischarge, self).__init__('discharge')
-
-    def get_data(self, station_id, start_date, end_date):
-        """Get river data from the Environment Canada wateroffice.ec.gc.ca
-        site.
-
-        :arg station_id: Station id
-                         - see http://www.wateroffice.ec.gc.ca/text_search/search_e.html.
+            - see http://www.wateroffice.ec.gc.ca/text_search/search_e.html.
         :type station_id: str
 
         :arg start_date: First date to get data for.
@@ -210,3 +178,11 @@ class RiverDischarge(RiverDataBase):
             response = s.get(self.DATA_URL, params=self.params)
         soup = bs4.BeautifulSoup(response.content)
         return soup.find('table', id='dataTable')
+
+
+class RiverDischarge(RiverDataBase):
+    """ECget driver to get river discharge data from Environment Canada
+    wateroffice.ec.gc.ca site.
+    """
+    def __init__(self):
+        super(RiverDischarge, self).__init__('discharge')

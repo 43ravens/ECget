@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import datetime
 import logging
 import time
 
@@ -65,6 +66,8 @@ class RiverFlow(cliff.command.Command):
             parsed_args.end_date,
         )
         daily_avgs = self._calc_daily_avgs(raw_data, parsed_args.end_date)
+        if len(daily_avgs) > 1:
+            self._interpolate_missing(daily_avgs)
         self._output_results(daily_avgs)
 
     def _get_data(self, station_id, start_date, end_date):
@@ -122,6 +125,40 @@ class RiverFlow(cliff.command.Command):
         except ValueError:
             # Ignore training `*`
             return float(flow_string[:-1])
+
+    def _interpolate_missing(self, daily_avgs):
+        """Fill in any missing data values by linear interpolation.
+        """
+        i = 0
+        while True:
+            try:
+                delta = (daily_avgs[i + 1][0] - daily_avgs[i][0]).days
+            except IndexError:
+                break
+            if delta > 1:
+                gap_start = i + 1
+                for j in range(1, delta):
+                    missing_date = (
+                        daily_avgs[i][0]
+                        + j * datetime.timedelta(days=1))
+                    daily_avgs.insert(i + j, (missing_date, None))
+                    self.log.debug(
+                        'interpolated average flow for {}'
+                        .format(missing_date))
+                gap_end = i + delta - 1
+                self._interpolate_values(daily_avgs, gap_start, gap_end)
+            i += delta
+
+    def _interpolate_values(self, daily_avgs, gap_start, gap_end):
+        """Calculate missing data values by linear interpolation.
+        """
+        last_value = daily_avgs[gap_start - 1][1]
+        next_value = daily_avgs[gap_end + 1][1]
+        delta = (next_value - last_value) / (gap_end - gap_start + 2)
+        for i in range(gap_end - gap_start + 1):
+            datestamp = daily_avgs[gap_start + i][0]
+            value = last_value + delta * (i + 1)
+            daily_avgs[gap_start + i] = (datestamp, value)
 
     def _output_results(self, daily_avgs):
         mgr = stevedore.driver.DriverManager(

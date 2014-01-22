@@ -15,7 +15,7 @@ Bugs should be files under the `Bitbucket project`_.
 .. note::
 
     Before contributing new features to ECget,
-    please consider whether they should eb implemented as an extension instead.
+    please consider whether they should be implemented as an extension instead.
     The architecture is highly pluggable precisely to keep the core small.
 
 

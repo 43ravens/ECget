@@ -4,7 +4,7 @@ ECget
 :Author: Doug Latornell <djl@douglatornell.ca>
 :License: Apache License, Version 2.0
 
-ECget tool to get observation data from Environment Canada weather and hydrometric web services and sites and store it in project-specific file formats.
+ECget is a tool to get observation data from Environment Canada weather and hydrometric web services and sites and store it in project-specific file formats.
 ECget was developed to support the SOG coupled physics-biogeochemical model for deep estuaries
 (http://www.eos.ubc.ca/~sallen/SOG-docs/)
 and it use to predict the timing of the spring phytoplankton bloom in the Strait of Georgia

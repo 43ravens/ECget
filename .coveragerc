@@ -1,0 +1,9 @@
+[run]
+branch = True
+source =
+    ecget
+    tests
+
+[report]
+show_missing = True
+omit = __pkg_metadata__.py

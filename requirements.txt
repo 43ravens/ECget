@@ -8,10 +8,15 @@ arrow==0.4.2
 beautifulsoup4==4.3.2
 cliff==1.5.2
 cmd2==0.6.7
+coverage==3.7.1
 docutils==0.11
 prettytable==0.7.2
+py==1.4.19
 pyparsing==2.0.1
+pytest==2.5.1
 python-dateutil==2.2
 requests==2.2.0
 six==1.5.2
 stevedore==0.13
+tox==1.6.1
+virtualenv==1.11.1

@@ -24,12 +24,23 @@ import arrow
 import bs4
 import cliff.app
 import pytest
+import stevedore.driver
 
 
 @pytest.fixture
 def river_flow():
     import ecget.river
     return ecget.river.RiverFlow(mock.Mock(spec=cliff.app.App), [])
+
+
+@pytest.fixture
+def daily_value_mgr():
+    import ecget.SOG_formatters
+    driver = mock.Mock(
+        name='daily_value',
+        obj=ecget.SOG_formatters.DailyValue(),
+    )
+    return stevedore.driver.DriverManager.make_test_instance(driver)
 
 
 def test_get_parser(river_flow):
@@ -197,3 +208,9 @@ def test_interpolate_values_2_day_gap(river_flow):
         (datetime.date(2014, 1, 24), 4500.0),
     ]
     assert daily_avgs[1:3] == expected
+
+
+def test_output_results(daily_value_mgr, river_flow, capsys):
+    river_flow._output_results([(datetime.date(2014, 1, 23), 4200.0)])
+    out, err = capsys.readouterr()
+    assert out == '2014 01 23 4.200000e+03\n'

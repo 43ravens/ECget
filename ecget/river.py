@@ -18,6 +18,7 @@ limitations under the License.
 import datetime
 import logging
 import time
+import sys
 
 import arrow
 import bs4
@@ -167,7 +168,7 @@ class RiverFlow(cliff.command.Command):
             invoke_on_load=True,
         )
         for chunk in mgr.driver.format(daily_avgs):
-            print(chunk, end='')
+            sys.stdout.write(chunk)
 
 
 class RiverDataBase(object):

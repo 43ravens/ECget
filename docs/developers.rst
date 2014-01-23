@@ -19,6 +19,8 @@ Bugs should be files under the `Bitbucket project`_.
     The architecture is highly pluggable precisely to keep the core small.
 
 
+.. _DevelopmentEnvironment:
+
 Development Environment
 =======================
 
@@ -102,3 +104,61 @@ Once that has been done use:
 
 to generate the HTML version of the documentation.
 The output ends up in :file:`./docs/_build/html/` in your development directory.
+
+
+Running Tests
+=============
+
+The test suite for ECget uses pytest_,
+coverage_,
+and tox_.
+Installing the development packages via the :file:`requirements.txt` file as described in the :ref:`DevelopmentEnvironment` section above will install those packages and their dependencies.
+
+.. _pytest: http://pytest.org/
+.. _coverage: http://nedbatchelder.com/code/coverage/
+.. _tox: http://tox.testrun.org/
+
+Use the :command:`py.test` command from the top level directory of the Mercurial repository to run the test suite in the development environment:
+
+.. code-block:: bash
+
+    (ecget)$ py.test
+    ======================================= test session starts ========================================
+    platform darwin -- Python 3.3.2 -- pytest-2.5.1
+    collected 1 items
+
+    tests/test_SOG_formatters.py .
+
+    ===================================== 1 passed in 0.13 seconds =====================================
+
+To gather test coverage data use :command:`coverage run -m py.test` and view the coverage report with :command:`coverage report`:
+
+.. code-block:: bash
+
+    (ecget)$ coverage report
+    Name                        Stmts   Miss Branch BrMiss  Cover   Missing
+    -----------------------------------------------------------------------
+    ecget/SOG_formatters            9      0      4      2    85%
+    ecget/__init__                  0      0      0      0   100%
+    ecget/main                     12     12      2      2     0%   22-45
+    ecget/river                   110    110     24     24     0%   18-229
+    tests/test_SOG_formatters       9      0      0      0   100%
+    -----------------------------------------------------------------------
+    TOTAL                         140    122     30     28    12%
+
+The default :program:`coverage` run and report option values are set in the :file:`.coveragerc` file.
+
+Use the :command:`tox` command to run the tests under Python 3.3,
+3.2,
+and 2.7.
+
+.. note::
+
+    You must have all of those versions of Python installed on your system for :program:`tox` to succeed.
+
+To run the tests under a single version of Python,
+specify the appropriate environment when running :command:`tox`:
+
+.. code-block:: bash
+
+    (ecget)$ tox -e py27

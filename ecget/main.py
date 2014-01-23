@@ -24,7 +24,7 @@ import sys
 import cliff.app
 import cliff.commandmanager
 
-import __pkg_metadata__
+from . import __pkg_metadata__
 
 
 class ECgetApp(cliff.app.App):

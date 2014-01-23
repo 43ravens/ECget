@@ -91,6 +91,64 @@ def test_calc_daily_avgs_1_row(river_flow):
     assert daily_avgs == [(datetime.date(2014, 1, 21), 4200.0)]
 
 
+def test_calc_daily_avgs_2_rows_1_day(river_flow):
+    html = '''
+        <table>
+          <tr>
+            <td>2014-01-21 19:02:00</td>
+            <td>4200.0</td>
+          </tr>
+          <tr>
+            <td>2014-01-21 19:07:00</td>
+            <td>4400.0</td>
+          </tr>
+        </table>
+    '''
+    raw_data = bs4.BeautifulSoup(html)
+    daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 22))
+    assert daily_avgs == [(datetime.date(2014, 1, 21), 4300.0)]
+
+
+def test_calc_daily_avgs_2_rows_2_days(river_flow):
+    html = '''
+        <table>
+          <tr>
+            <td>2014-01-21 19:02:00</td>
+            <td>4200.0</td>
+          </tr>
+          <tr>
+            <td>2014-01-22 19:07:00</td>
+            <td>4400.0</td>
+          </tr>
+        </table>
+    '''
+    raw_data = bs4.BeautifulSoup(html)
+    daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 23))
+    expected = [
+        (datetime.date(2014, 1, 21), 4200.0),
+        (datetime.date(2014, 1, 22), 4400.0),
+    ]
+    assert daily_avgs == expected
+
+
+def test_calc_daily_avgs_end_date(river_flow):
+    html = '''
+        <table>
+          <tr>
+            <td>2014-01-21 19:02:00</td>
+            <td>4200.0</td>
+          </tr>
+          <tr>
+            <td>2014-01-22 19:07:00</td>
+            <td>4400.0</td>
+          </tr>
+        </table>
+    '''
+    raw_data = bs4.BeautifulSoup(html)
+    daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 21))
+    assert daily_avgs == [(datetime.date(2014, 1, 21), 4200.0)]
+
+
 def test_read_datestamp(river_flow):
     datestamp = river_flow._read_datestamp('2014-01-22 18:16:42')
     assert datestamp == datetime.date(2014, 1, 22)

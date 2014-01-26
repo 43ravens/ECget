@@ -47,6 +47,7 @@ install_requires = [
     'arrow',
     'beautifulsoup4',
     'cliff',
+    'kombu',
     'requests',
 ]
 
@@ -75,6 +76,7 @@ setup(
         # Sub-command plug-ins:
         'ecget.app': [
             'river flow = ecget.river:RiverFlow',
+            'wind = ecget.weather_amqp:SandHeadsWind',
         ],
         # Data getter drivers:
         'ecget.get_data': [

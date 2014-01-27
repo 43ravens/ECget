@@ -154,14 +154,15 @@ def test_read_datestamp(river_flow):
     assert datestamp == datetime.date(2014, 1, 22)
 
 
-def test_convert_flow_normal(river_flow):
-    flow = river_flow._convert_flow('4200.0')
-    assert flow == 4200.0
-
-
-def test_convert_flow_provisional(river_flow):
-    flow = river_flow._convert_flow('4200.0*')
-    assert flow == 4200.0
+@pytest.mark.parametrize(
+    'input, expected', [
+        ('4200.0', 4200.0),
+        ('4200.0*', 4200.0),
+    ]
+)
+def test_convert_flow(river_flow, input, expected):
+    flow = river_flow._convert_flow(input)
+    assert flow == expected
 
 
 def test_interpolate_missing_no_gap(river_flow):

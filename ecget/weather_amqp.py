@@ -20,6 +20,7 @@ import time
 
 import cliff
 import kombu
+import kombu.exceptions
 import kombu.mixins
 
 
@@ -115,10 +116,14 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
         self.log.debug('exchange bound to channel: {}'.format(exchg))
         queue = self.queue(channel)
         self.log.debug('queue bound to channel: {}'.format(queue))
-        queue.queue_declare()
-        self.log.debug('queue declared on server')
-        queue.queue_bind()
-        self.log.debug('queue binding created on server')
+        try:
+            queue.queue_declare(passive=True)
+            self.log.debug('queue exists on server')
+        except kombu.exceptions.ChannelError:
+            queue.queue_declare()
+            self.log.debug('queue declared on server')
+            queue.queue_bind()
+            self.log.debug('queue binding created on server')
         return [
             Consumer(
                 queues=[queue],

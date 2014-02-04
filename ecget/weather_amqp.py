@@ -83,7 +83,7 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
         routing_key,
         msg_handler,
         lifetime=900,
-        queue_expiry=1800000,
+        queue_expiry=None,
     ):
         self.queue_name = queue_name
         self.routing_key = routing_key
@@ -104,6 +104,9 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
         if time.time() > self.end_time:
             self.log.debug('consumer lifetime limit reached')
             self.should_stop = True
+
+    def on_consume_end(self, connection, channel):
+        connection.close()
 
     def get_consumers(self, Consumer, channel):
         """Bind exchange and queue to AMQP channel,
@@ -156,5 +159,6 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
             exchange=self.exchange,
             routing_key=self.routing_key,
         )
-        self.queue.queue_arguments = {'x-expires': self.queue_expiry}
+        if self.queue_expiry is not None:
+            self.queue.queue_arguments = {'x-expires': self.queue_expiry}
         super(DatamartConsumer, self).run()

@@ -153,7 +153,7 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
             password='anonymous',
             virtual_host='/',
         )
-        self.exchange = kombu.Exchange(name='cmc', type='topic')
+        self.exchange = kombu.Exchange(name='xpublic', type='topic')
         self.queue = kombu.Queue(
             name=self.queue_name,
             exchange=self.exchange,

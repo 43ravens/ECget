@@ -85,11 +85,11 @@ class TestDatamartConsumer(object):
         consumer.get_consumers(mock_Consumer, mock_channel)
         consumer.queue.assert_called_once_with(mock_channel)
 
-    def test_get_consumers_declares_queue_on_server(self, consumer):
+    def test_get_consumers_checks_for_queue_on_server(self, consumer):
         mock_Consumer = mock.Mock(name='Consumer')
         mock_channel = mock.Mock(name='channel')
         consumer.get_consumers(mock_Consumer, mock_channel)
-        consumer.queue().queue_declare.assert_called_once_with()
+        consumer.queue().queue_declare.assert_called_once_with(passive=True)
 
     def test_get_consumers_binds_queue_on_server(self, consumer):
         mock_Consumer = mock.Mock(name='Consumer')

@@ -50,3 +50,31 @@ class DailyValue(FormatterBase):
                 value=value,
             )
             yield line
+
+
+class HourlyWindComponents(FormatterBase):
+    """Format time-stamped hourly wind components
+    as DD MM YYYY HH.0 CROSS ALONG,
+    where CROSS and ALONG are the wind components with 4 decimal place
+    precision.
+    """
+    def format(self, data):
+        """Format the data and return a line of text.
+
+        :arg data: An iterable of 2-tuples containing timestamps
+                   and a (cross-strait, along-strait) wind component
+                   tuple.
+
+        :returns: Iterable producing the formatted text.
+        """
+        for timestamp, components in data:
+            line = (
+                '{date} {hour:.1f} {cross_wind:.4f} {along_wind:.4f}\n'
+                .format(
+                    date=timestamp.format('DD MM YYYY'),
+                    hour=timestamp.hour,
+                    cross_wind=components[0],
+                    along_wind=components[1],
+                )
+            )
+            yield line

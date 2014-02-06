@@ -16,12 +16,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import logging
+import math
+import sys
 import time
 
+import arrow
 import cliff
 import kombu
 import kombu.exceptions
 import kombu.mixins
+import stevedore.driver
 
 
 class SandHeadsWind(cliff.command.Command):
@@ -30,6 +34,8 @@ class SandHeadsWind(cliff.command.Command):
 
     ECget command plug-in.
     """
+    STRAIT_HEADING = math.radians(305)
+
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
@@ -50,6 +56,50 @@ class SandHeadsWind(cliff.command.Command):
 
     def _handle_msg(self, body):
         self.log.debug(body)
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.get_data',
+            name='wind',
+            invoke_on_load=True,
+            invoke_args=(body,),
+        )
+        raw_data = mgr.driver.get_data(
+            'avg_wnd_spd_10m_mt58-60', 'avg_wnd_dir_10m_mt58-60')
+        hourly_winds = self._calc_hourly_winds(raw_data)
+        self._output_results(hourly_winds)
+
+    def _calc_hourly_winds(self, raw_data):
+        timestamp = arrow.get(raw_data['timestamp']).to('PST')
+        speed = float(raw_data['avg_wnd_spd_10m_mt58-60']['value'])
+        direction = float(raw_data['avg_wnd_dir_10m_mt58-60']['value'])
+        # Convert speed from km/hr to m/s
+        speed = speed * 1000 / (60 * 60)
+        # Convert wind speed and direction to u and v components
+        radian_direction = math.radians(direction)
+        u_wind = speed * math.sin(radian_direction)
+        v_wind = speed * math.cos(radian_direction)
+        # Rotate components to align u direction with Strait
+        cross_wind = (
+            u_wind * math.cos(self.STRAIT_HEADING)
+            - v_wind * math.sin(self.STRAIT_HEADING)
+        )
+        along_wind = (
+            u_wind * math.sin(self.STRAIT_HEADING)
+            + v_wind * math.cos(self.STRAIT_HEADING)
+        )
+        # Resolve atmosphere/ocean direction convention difference in
+        # favour of oceanography
+        cross_wind = -cross_wind
+        along_wind = -along_wind
+        return [(timestamp, (cross_wind, along_wind))]
+
+    def _output_results(self, hourly_winds):
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.formatter',
+            name='wind.hourly.components',
+            invoke_on_load=True,
+        )
+        for chunk in mgr.driver.format(hourly_winds):
+            sys.stdout.write(chunk)
 
 
 class DatamartConsumer(kombu.mixins.ConsumerMixin):

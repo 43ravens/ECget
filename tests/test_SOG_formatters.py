@@ -16,6 +16,7 @@ limitations under the License.
 """
 import datetime
 
+import arrow
 import pytest
 
 
@@ -25,7 +26,33 @@ def daily_value():
     return ecget.SOG_formatters.DailyValue()
 
 
-def test_DailyValue_format(daily_value):
-    data = [(datetime.date(2014, 1, 22), 1234.567)]
+@pytest.fixture
+def hourly_wind():
+    import ecget.SOG_formatters
+    return ecget.SOG_formatters.HourlyWindComponents()
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    [
+        ([(datetime.date(2014, 1, 22), 1234.567)],
+         '2014 01 22 1.234567e+03\n'),
+    ],
+)
+def test_DailyValue_format(data, expected, daily_value):
     line = next(daily_value.format(data))
-    assert line == '2014 01 22 1.234567e+03\n'
+    assert line == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    [
+        ([(arrow.get(2014, 2, 6, 0, 0, 0), (-0.847842, 8.066742))],
+         '06 02 2014 0.0 -0.8478 8.0667\n'),
+        ([(arrow.get(2014, 2, 6, 23, 0, 0), (-0.8, 8.06))],
+         '06 02 2014 23.0 -0.8000 8.0600\n'),
+    ],
+)
+def test_HourlyWindComponents_format(data, expected, hourly_wind):
+    line = next(hourly_wind.format(data))
+    assert line == expected

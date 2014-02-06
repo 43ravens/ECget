@@ -63,7 +63,9 @@ class DatamartWeather(DatamartWeatherBase):
     :arg url: URL to get SWOB-ML data file from.
     :type url: str
     """
-    ELEMENTS_TAG = '{http://dms.ec.gc.ca/schema/point-observation/2.0}elements'
+    PT_OBS_NS = '{http://dms.ec.gc.ca/schema/point-observation/2.0}'
+    ID_ELEMENTS_TAG = ''.join((PT_OBS_NS, 'identification-elements'))
+    ELEMENTS_TAG = ''.join((PT_OBS_NS, 'elements'))
 
     log = logging.getLogger(__name__)
 
@@ -87,9 +89,20 @@ class DatamartWeather(DatamartWeatherBase):
             for el in elements:
                 if el.attrib['name'] in labels:
                     yield el.attrib.pop('name'), el.attrib
+
+        def get_timestep(id_elements):
+            for el in id_elements:
+                if el.attrib['name'] == 'date_tm':
+                    return el.attrib['value']
         data = {}
         response = requests.get(self.url)
         root = ET.fromstring(response.content)
+        try:
+            id_elements = list(root.iter(self.ID_ELEMENTS_TAG))[0]
+        except IndexError:
+            self.log.warn(
+                'no {0.ID_ELEMENTS_TAG} tag found in {0.url}'.format(self))
+            return data
         try:
             elements = list(root.iter(self.ELEMENTS_TAG))[0]
         except IndexError:
@@ -98,4 +111,6 @@ class DatamartWeather(DatamartWeatherBase):
             return data
         for name, attrs in interesting(elements):
             data.update({name: attrs})
+        if data:
+            data['timestamp'] = get_timestep(id_elements)
         return data

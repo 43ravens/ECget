@@ -81,10 +81,13 @@ setup(
         # Data getter drivers:
         'ecget.get_data': [
             'river.discharge = ecget.river:RiverDischarge',
+            'wind = ecget.weather_datamart:DatamartWeather',
         ],
         # Output formatters:
         'ecget.formatter': [
             'river.daily_avg_flow = ecget.SOG_formatters:DailyValue',
+            ('wind.hourly.components = '
+                'ecget.SOG_formatters:HourlyWindComponents'),
         ],
     },
 )

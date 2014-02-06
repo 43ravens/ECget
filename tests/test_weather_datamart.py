@@ -58,4 +58,4 @@ def test_get_data_element_matches_label(mock_ET, mock_resp, dd_weather):
     mock_root = mock.Mock(iter=mock.Mock(return_value=[[mock_el]]))
     mock_ET.fromstring.return_value = mock_root
     data = dd_weather.get_data('rel_hum')
-    assert data == {'rel_hum': {'value': '100', 'uom': '%'}}
+    assert data['rel_hum'] == {'value': '100', 'uom': '%'}

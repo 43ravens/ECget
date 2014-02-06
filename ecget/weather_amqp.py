@@ -44,6 +44,12 @@ class SandHeadsWind(cliff.command.Command):
             'Get Sand Heads wind data via AMQP and output hourly component '
             'values for SOG.'
         )
+        parser.add_argument(
+            '--lifetime',
+            type=int,
+            default=900,
+            help='queue consumer lifetime in seconds; defaults to 900',
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -51,6 +57,7 @@ class SandHeadsWind(cliff.command.Command):
             queue_name='cmc.SoG.SandHeads',
             routing_key='exp.dd.notify.observations.swob-ml.*.CWVF',
             msg_handler=self._handle_msg,
+            lifetime=parsed_args.lifetime,
         )
         consumer.run()
 

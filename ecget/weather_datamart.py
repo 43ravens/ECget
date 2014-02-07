@@ -16,6 +16,7 @@ limitations under the License.
 """
 import abc
 import logging
+import re
 
 import requests
 import xml.etree.ElementTree as ET
@@ -74,10 +75,13 @@ class DatamartWeather(DatamartWeatherBase):
         """
         pass
 
-    def get_data(self, *labels):
+    def get_data(self, *labels, label_regexs=[]):
         """Get the SWOB-ML data for the specified labels.
 
         :arg *labels: List of SWOB-ML label strings to get data for.
+
+        :arg label_regexs: List of regular expression patterns to
+                           match element names against to get data.
 
         :returns: Dictionary of SWOB-ML attributes and values found for
                   each label.
@@ -87,7 +91,10 @@ class DatamartWeather(DatamartWeatherBase):
         """
         def interesting(elements):
             for el in elements:
-                if el.attrib['name'] in labels:
+                name = el.attrib['name']
+                match = any(
+                    [re.search(regex, name) for regex in label_regexs])
+                if match or el.attrib['name'] in labels:
                     yield el.attrib.pop('name'), el.attrib
 
         def get_timestep(id_elements):

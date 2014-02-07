@@ -31,7 +31,40 @@ def dd_weather():
 @mock.patch('ecget.weather_datamart.requests.get')
 @mock.patch('ecget.weather_datamart.ET')
 def test_get_data_no_elements(mock_ET, mock_resp, dd_weather):
-    mock_root = mock.Mock(iter=mock.Mock(return_value=[]))
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            [[]],
+            [[]],
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
+    mock_ET.fromstring.return_value = mock_root
+    data = dd_weather.get_data()
+    assert data == {}
+
+
+@mock.patch('ecget.weather_datamart.requests.get')
+@mock.patch('ecget.weather_datamart.ET')
+def test_get_data_missing_id_elements(mock_ET, mock_resp, dd_weather):
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            IndexError,
+            [[]],
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
+    mock_ET.fromstring.return_value = mock_root
+    data = dd_weather.get_data()
+    assert data == {}
+
+
+@mock.patch('ecget.weather_datamart.requests.get')
+@mock.patch('ecget.weather_datamart.ET')
+def test_get_data_missing_data_elements(mock_ET, mock_resp, dd_weather):
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            [[]],
+            IndexError,
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
     mock_ET.fromstring.return_value = mock_root
     data = dd_weather.get_data()
     assert data == {}
@@ -40,10 +73,18 @@ def test_get_data_no_elements(mock_ET, mock_resp, dd_weather):
 @mock.patch('ecget.weather_datamart.requests.get')
 @mock.patch('ecget.weather_datamart.ET')
 def test_get_data_no_labels(mock_ET, mock_resp, dd_weather):
-    mock_el = mock.Mock(
+    id_elements = mock.Mock(
+        attrib={'name': 'date_tm', 'value': '2014-02-06T18:00:00.000Z'}
+    )
+    data_elements = mock.Mock(
         attrib={'value': '100', 'name': 'rel_hum', 'uom': '%'}
     )
-    mock_root = mock.Mock(iter=mock.Mock(return_value=[[mock_el]]))
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            [[id_elements]],
+            [[data_elements]],
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
     mock_ET.fromstring.return_value = mock_root
     data = dd_weather.get_data()
     assert data == {}
@@ -51,11 +92,41 @@ def test_get_data_no_labels(mock_ET, mock_resp, dd_weather):
 
 @mock.patch('ecget.weather_datamart.requests.get')
 @mock.patch('ecget.weather_datamart.ET')
-def test_get_data_element_matches_label(mock_ET, mock_resp, dd_weather):
-    mock_el = mock.Mock(
+def test_get_data_element_data_matches_label(mock_ET, mock_resp, dd_weather):
+    id_elements = mock.Mock(
+        attrib={'name': 'date_tm', 'value': '2014-02-06T18:00:00.000Z'}
+    )
+    data_elements = mock.Mock(
         attrib={'value': '100', 'name': 'rel_hum', 'uom': '%'}
     )
-    mock_root = mock.Mock(iter=mock.Mock(return_value=[[mock_el]]))
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            [[id_elements]],
+            [[data_elements]],
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
     mock_ET.fromstring.return_value = mock_root
     data = dd_weather.get_data('rel_hum')
     assert data['rel_hum'] == {'value': '100', 'uom': '%'}
+
+
+@mock.patch('ecget.weather_datamart.requests.get')
+@mock.patch('ecget.weather_datamart.ET')
+def test_get_data_element_timestamp_matches_label(
+    mock_ET, mock_resp, dd_weather,
+):
+    id_elements = mock.Mock(
+        attrib={'name': 'date_tm', 'value': '2014-02-06T18:00:00.000Z'}
+    )
+    data_elements = mock.Mock(
+        attrib={'value': '100', 'name': 'rel_hum', 'uom': '%'}
+    )
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            [[id_elements]],
+            [[data_elements]],
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
+    mock_ET.fromstring.return_value = mock_root
+    data = dd_weather.get_data('rel_hum')
+    assert data['timestamp'] == '2014-02-06T18:00:00.000Z'

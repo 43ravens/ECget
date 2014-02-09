@@ -52,6 +52,26 @@ class DailyValue(FormatterBase):
             yield line
 
 
+class HourlyValue(FormatterBase):
+    """Format date-stamped values as YYYY MM DD HH VALUE
+    with VALUE to 2 decimal place precision.
+    """
+    def format(self, data):
+        """Format the data and return a line of text.
+
+        :arg data: An iterable of 2-tuples containing timestamps
+        and data values.
+
+        :returns: Iterable producing the formatted text.
+        """
+        for timestamp, value in data:
+            line = '{timestamp} {value:.2f}\n'.format(
+                timestamp=timestamp.format('YYYY MM DD HH'),
+                value=value,
+            )
+            yield line
+
+
 class HourlyWindComponents(FormatterBase):
     """Format time-stamped hourly wind components
     as DD MM YYYY HH.0 CROSS ALONG,

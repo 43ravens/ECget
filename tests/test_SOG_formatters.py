@@ -32,6 +32,12 @@ def hourly_wind():
     return ecget.SOG_formatters.HourlyWindComponents()
 
 
+@pytest.fixture
+def hourly_value():
+    import ecget.SOG_formatters
+    return ecget.SOG_formatters.HourlyValue()
+
+
 @pytest.mark.parametrize(
     'data, expected',
     [
@@ -41,6 +47,20 @@ def hourly_wind():
 )
 def test_DailyValue_format(data, expected, daily_value):
     line = next(daily_value.format(data))
+    assert line == expected
+
+
+@pytest.mark.parametrize(
+    'data, expected',
+    [
+        ([(arrow.get(2014, 2, 9, 0, 0, 0), 5)],
+         '2014 02 09 00 5.00\n'),
+        ([(arrow.get(2014, 2, 9, 23, 0, 0), -2.142)],
+         '2014 02 09 23 -2.14\n'),
+    ],
+)
+def test_HourlyValue_format(data, expected, hourly_value):
+    line = next(hourly_value.format(data))
     assert line == expected
 
 

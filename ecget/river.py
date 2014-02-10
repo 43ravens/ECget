@@ -27,6 +27,11 @@ import requests
 import stevedore.driver
 
 
+__all__ = [
+    'RiverFlow', 'RiverDataBase', 'RiverDischarge',
+]
+
+
 class RiverFlow(cliff.command.Command):
     """Get EC river flow data and output daily average value(s) for SOG.
 

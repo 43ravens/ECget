@@ -24,6 +24,11 @@ import kombu.exceptions
 import kombu.mixins
 
 
+__all__ = [
+    'DatamartConsumer', 'get_queue_name',
+]
+
+
 class DatamartConsumer(kombu.mixins.ConsumerMixin):
     """Consumer for EC CMC Datamart AMQP topic exchange service.
 

@@ -27,6 +27,11 @@ import cliff.commandmanager
 from . import __pkg_metadata__
 
 
+__all__ = [
+    'ECgetApp', 'main',
+]
+
+
 class ECgetApp(cliff.app.App):
     def __init__(self):
         super(ECgetApp, self).__init__(

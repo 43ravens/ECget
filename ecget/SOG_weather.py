@@ -26,6 +26,11 @@ import stevedore.driver
 from . import weather_amqp
 
 
+__all__ = [
+    'SandHeadsWind',
+]
+
+
 class SandHeadsWind(cliff.command.Command):
     """Get Sand Heads wind data via AMQP and output hourly component
     values for SOG.

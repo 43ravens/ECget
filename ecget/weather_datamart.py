@@ -22,6 +22,11 @@ import requests
 import xml.etree.ElementTree as ET
 
 
+__all__ = [
+    'DatamartWeatherBase', 'DatamartWeather',
+]
+
+
 class DatamartWeatherBase(object):
     """Base class for driver plug-in to get weather data from an
     Environment Canada CMC Datamart URL.

@@ -34,8 +34,6 @@ working Python 3.3 virtual environment:
     pyvenv-3.3 ecget
     cd ecget
     (ecget)$ . bin/activate
-    (ecget)$ curl -O https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-    (ecget)$ python3.3 ez_setup.py
     (ecget)$ curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
     (ecget)$ python3.3 get-pip.py
 

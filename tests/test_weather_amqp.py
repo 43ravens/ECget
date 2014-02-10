@@ -39,6 +39,12 @@ def consumer():
     return consumer
 
 
+@pytest.fixture
+def get_queue_name():
+    import ecget.weather_amqp
+    return ecget.weather_amqp.get_queue_name
+
+
 @pytest.mark.usefixture('consumer')
 class TestDatamartConsumer(object):
     @mock.patch('ecget.weather_amqp.time.time', return_value=1)
@@ -130,3 +136,40 @@ class TestDatamartConsumer(object):
         mock_msg = mock.Mock(name='msg')
         consumer.handle_msg(mock.Mock(name='body'), mock_msg)
         mock_msg.ack.assert_called_once_with()
+
+
+def test_get_queue_name_creates_queues_dir(get_queue_name):
+    with mock.patch('ecget.weather_amqp.os.path.exists', return_value=False):
+        with mock.patch('ecget.weather_amqp.os.mkdir') as mock_mkdir:
+            get_queue_name('foo')
+    mock_mkdir.assert_called_once_with('./queues')
+
+
+def test_get_queue_name_creates_queue_file(get_queue_name):
+    m_open = mock.mock_open()
+    with mock.patch('ecget.weather_amqp.os.path.exists', return_value=False):
+        with mock.patch('ecget.weather_amqp.os.mkdir'):
+            with mock.patch('ecget.weather_amqp.open', m_open, create=True):
+                get_queue_name('foo')
+    m_open.assert_called_once_with('./queues/foo', 'wt')
+
+
+def test_get_queue_name_writes_queue_name_to_file(get_queue_name):
+    m_open = mock.mock_open()
+    with mock.patch('ecget.weather_amqp.os.path.exists', return_value=False):
+        with mock.patch('ecget.weather_amqp.os.mkdir'):
+            with mock.patch('ecget.weather_amqp.open', m_open, create=True):
+                get_queue_name('foo')
+    m_open().write.assert_called_once_with('foo')
+
+
+def test_get_queue_name_returns_queue_name_from_file(get_queue_name):
+    with mock.patch('ecget.weather_amqp.os.path.exists', return_value=True):
+        patch_open = mock.patch(
+            'ecget.weather_amqp.open',
+            mock.mock_open(read_data='foo.uuid'),
+            create=True,
+        )
+        with patch_open:
+            queue_name = get_queue_name('foo')
+    assert queue_name == 'foo.uuid'

@@ -32,6 +32,9 @@ class SandHeadsWind(cliff.command.Command):
 
     ECget command plug-in.
     """
+    QUEUE_NAME_PREFIX = 'cmc.SoG.SandHeads'
+    ROUTING_KEY = 'exp.dd.notify.observations.swob-ml.*.CWVF'
+
     STRAIT_HEADING = math.radians(305)
 
     log = logging.getLogger(__name__)
@@ -51,9 +54,10 @@ class SandHeadsWind(cliff.command.Command):
         return parser
 
     def take_action(self, parsed_args):
+        queue_name = weather_amqp.get_queue_name(self.QUEUE_NAME_PREFIX)
         consumer = weather_amqp.DatamartConsumer(
-            queue_name='cmc.SoG.SandHeads',
-            routing_key='exp.dd.notify.observations.swob-ml.*.CWVF',
+            queue_name=queue_name,
+            routing_key=self.ROUTING_KEY,
             msg_handler=self._handle_msg,
             lifetime=parsed_args.lifetime,
         )

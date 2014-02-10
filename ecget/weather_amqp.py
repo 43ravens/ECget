@@ -15,7 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import logging
+import os
 import time
+import uuid
 
 import kombu
 import kombu.exceptions
@@ -140,3 +142,48 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
         if self.queue_expiry is not None:
             self.queue.queue_arguments = {'x-expires': self.queue_expiry}
         super(DatamartConsumer, self).run()
+
+
+def get_queue_name(prefix):
+    """Return a queue name based on the prefix.
+
+    The queue name is the prefix with the string representation of a
+    random UUID dot-appended to it;
+    i.e. the queue name for the prefix :kbd:`foo.bar` might be
+    :kbd:`foo.bar.4749cb1b-b33d-46ac-b89c-b4d469ddabe9`.
+
+    Queues persist on the AMQP server but the name can only be provided
+    by the client/consumer.
+    To allow the client/consumer to re-connect to a queue that it has
+    already created on the server,
+    queue names are stored in the :file:`./queues/` directory in files
+    named with their prefixes.
+
+    If a queue file with the name prefix exists in the :file:`./queues/`
+    directory its contents are returned as the queue name.
+    Otherwise,
+    a random UUID is dot-appended to prefix,
+    stored in a file called prefix in the :file:`./queues/` directory,
+    and the newly created queue name is returned.
+
+    This function creates the :file:`./queues/` directory if it does not
+    already exist.
+
+    :arg prefix: Queue name prefix.
+    :type prefix: str
+
+    :returns: Queue name
+    :rtype: str
+    """
+    queues_dir = os.path.join('.', 'queues')
+    if not os.path.exists(queues_dir):
+        os.mkdir(queues_dir)
+    queue_file = os.path.join(queues_dir, prefix)
+    if not os.path.exists(queue_file):
+        queue_name = '.'.join((prefix, str(uuid.uuid4())))
+        with open(queue_file, 'wt') as f:
+            f.write(queue_name)
+    else:
+        with open(queue_file, 'rt') as f:
+            queue_name = f.read()
+    return queue_name

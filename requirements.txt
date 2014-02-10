@@ -4,7 +4,7 @@ Jinja2==2.7.2
 MarkupSafe==0.18
 Pygments==1.6
 Sphinx==1.2.1
-amqp==1.4.2
+amqp==1.4.3
 anyjson==0.3.3
 arrow==0.4.2
 beautifulsoup4==4.3.2
@@ -12,7 +12,7 @@ cliff==1.5.2
 cmd2==0.6.7
 coverage==3.7.1
 docutils==0.11
-kombu==3.0.10
+kombu==3.0.12
 prettytable==0.7.2
 py==1.4.20
 pyparsing==2.0.1

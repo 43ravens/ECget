@@ -45,6 +45,19 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
                        :kbd:`x-expires` queue declaration argument.
     :type queue_expiry: int
     """
+    CONNECTION = {
+        'transport': 'amqp',
+        'userid': 'anonymous',
+        'password': 'anonymous',
+        'hostname': 'dd.weather.gc.ca',
+        'port': 5672,
+        'virtual_host': '/',
+    }
+    EXCHANGE = {
+        'name': 'xpublic',
+        'type': 'topic',
+    }
+
     log = logging.getLogger(__name__)
 
     def __init__(
@@ -117,15 +130,8 @@ class DatamartConsumer(kombu.mixins.ConsumerMixin):
     def run(self):
         """Run the consumer.
         """
-        self.connection = kombu.Connection(
-            transport='amqp',
-            hostname='dd.weather.gc.ca',
-            port='5672',
-            userid='anonymous',
-            password='anonymous',
-            virtual_host='/',
-        )
-        self.exchange = kombu.Exchange(name='xpublic', type='topic')
+        self.connection = kombu.Connection(**self.CONNECTION)
+        self.exchange = kombu.Exchange(**self.EXCHANGE)
         self.queue = kombu.Queue(
             name=self.queue_name,
             exchange=self.exchange,

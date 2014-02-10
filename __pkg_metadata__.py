@@ -21,5 +21,5 @@ __all__ = [
 
 PROJECT = 'ECget'
 DESCRIPTION = 'Get Environment Canada Weather & Hydrometric Data'
-VERSION = '0.1'
-DEV_STATUS = '3 - Alpha'
+VERSION = '0.2'
+DEV_STATUS = '4 - Beta'

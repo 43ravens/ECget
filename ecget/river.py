@@ -58,7 +58,7 @@ class RiverFlow(cliff.command.Command):
         parser.add_argument(
             '-e', '--end-date',
             type=arrow.get,
-            help='last date to get data for; YYYY-MM-DD.'
+            help='last date to get data for; YYYY-MM-DD. '
                  'Defaults to start date.',
         )
         return parser

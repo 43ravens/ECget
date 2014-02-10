@@ -76,7 +76,7 @@ setup(
         # Sub-command plug-ins:
         'ecget.app': [
             'river flow = ecget.river:RiverFlow',
-            'wind = ecget.weather_amqp:SandHeadsWind',
+            'wind = ecget.SOG_weather:SandHeadsWind',
         ],
         # Data getter drivers:
         'ecget.get_data': [

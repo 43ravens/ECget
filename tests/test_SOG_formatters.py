@@ -14,8 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import datetime
-
 import arrow
 import pytest
 
@@ -41,7 +39,7 @@ def hourly_value():
 @pytest.mark.parametrize(
     'data, expected',
     [
-        ([(datetime.date(2014, 1, 22), 1234.567)],
+        ([(arrow.get(2014, 1, 22), 1234.567)],
          '2014 01 22 1.234567e+03\n'),
     ],
 )

@@ -45,8 +45,8 @@ class DailyValue(FormatterBase):
         :returns: Iterable producing the formatted text.
         """
         for date, value in data:
-            line = '{date:%Y %m %d} {value:e}\n'.format(
-                date=date,
+            line = '{date} {value:e}\n'.format(
+                date=date.format('YYYY MM DD'),
                 value=value,
             )
             yield line

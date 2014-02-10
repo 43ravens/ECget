@@ -97,7 +97,7 @@ class RiverFlow(cliff.command.Command):
             'calculated average flow for {data_day} from {count} observations')
         for timestamp, flow in zip(timestamps, flows):
             datestamp = self._read_datestamp(timestamp)
-            if datestamp > end_date.date():
+            if datestamp > end_date:
                 break
             if datestamp == data_day:
                 flow_sum += self._convert_flow(flow)
@@ -113,7 +113,8 @@ class RiverFlow(cliff.command.Command):
         return daily_avgs
 
     def _read_datestamp(self, string):
-        return arrow.get(string, 'YYYY-MM-DD HH:mm:ss').date()
+        return (arrow.get(string, 'YYYY-MM-DD HH:mm:ss')
+                .replace(hour=0, minute=0, second=0))
 
     def _convert_flow(self, flow_string):
         """Convert a flow data value from a string to a float.
@@ -144,8 +145,8 @@ class RiverFlow(cliff.command.Command):
                         + j * datetime.timedelta(days=1))
                     daily_avgs.insert(i + j, (missing_date, None))
                     self.log.debug(
-                        'interpolated average flow for {}'
-                        .format(missing_date))
+                        'interpolated average flow for {date}'
+                        .format(date=missing_date.format('YYYY-MM-DD')))
                 gap_end = i + delta - 1
                 self._interpolate_values(daily_avgs, gap_start, gap_end)
             i += delta

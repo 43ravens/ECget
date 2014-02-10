@@ -14,7 +14,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import datetime
 try:
     import unittest.mock as mock
 except ImportError:     # pragma: no cover; happens for Python < 3.3
@@ -88,7 +87,7 @@ def test_calc_daily_avgs_1_row(river_flow):
     '''
     raw_data = bs4.BeautifulSoup(html)
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 22))
-    assert daily_avgs == [(datetime.date(2014, 1, 21), 4200.0)]
+    assert daily_avgs == [(arrow.get(2014, 1, 21), 4200.0)]
 
 
 def test_calc_daily_avgs_2_rows_1_day(river_flow):
@@ -106,7 +105,7 @@ def test_calc_daily_avgs_2_rows_1_day(river_flow):
     '''
     raw_data = bs4.BeautifulSoup(html)
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 22))
-    assert daily_avgs == [(datetime.date(2014, 1, 21), 4300.0)]
+    assert daily_avgs == [(arrow.get(2014, 1, 21), 4300.0)]
 
 
 def test_calc_daily_avgs_2_rows_2_days(river_flow):
@@ -125,8 +124,8 @@ def test_calc_daily_avgs_2_rows_2_days(river_flow):
     raw_data = bs4.BeautifulSoup(html)
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 23))
     expected = [
-        (datetime.date(2014, 1, 21), 4200.0),
-        (datetime.date(2014, 1, 22), 4400.0),
+        (arrow.get(2014, 1, 21), 4200.0),
+        (arrow.get(2014, 1, 22), 4400.0),
     ]
     assert daily_avgs == expected
 
@@ -146,12 +145,12 @@ def test_calc_daily_avgs_end_date(river_flow):
     '''
     raw_data = bs4.BeautifulSoup(html)
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 21))
-    assert daily_avgs == [(datetime.date(2014, 1, 21), 4200.0)]
+    assert daily_avgs == [(arrow.get(2014, 1, 21), 4200.0)]
 
 
 def test_read_datestamp(river_flow):
     datestamp = river_flow._read_datestamp('2014-01-22 18:16:42')
-    assert datestamp == datetime.date(2014, 1, 22)
+    assert datestamp == arrow.get(2014, 1, 22)
 
 
 @pytest.mark.parametrize(
@@ -167,8 +166,8 @@ def test_convert_flow(river_flow, input, expected):
 
 def test_interpolate_missing_no_gap(river_flow):
     daily_avgs = [
-        (datetime.date(2014, 1, 22), 4300.0),
-        (datetime.date(2014, 1, 23), 4500.0),
+        (arrow.get(2014, 1, 22), 4300.0),
+        (arrow.get(2014, 1, 23), 4500.0),
     ]
     river_flow.log = mock.Mock()
     river_flow._interpolate_values = mock.Mock()
@@ -180,13 +179,13 @@ def test_interpolate_missing_no_gap(river_flow):
 
 def test_interpolate_missing_1_day_gap(river_flow):
     daily_avgs = [
-        (datetime.date(2014, 1, 22), 4300.0),
-        (datetime.date(2014, 1, 24), 4500.0),
+        (arrow.get(2014, 1, 22), 4300.0),
+        (arrow.get(2014, 1, 24), 4500.0),
     ]
     river_flow.log = mock.Mock()
     river_flow._interpolate_values = mock.Mock()
     river_flow._interpolate_missing(daily_avgs)
-    expected = (datetime.date(2014, 1, 23), None)
+    expected = (arrow.get(2014, 1, 23), None)
     assert daily_avgs[1] == expected
     river_flow.log.debug.assert_called_once_with(
         'interpolated average flow for 2014-01-23')
@@ -195,15 +194,15 @@ def test_interpolate_missing_1_day_gap(river_flow):
 
 def test_interpolate_missing_2_day_gap(river_flow):
     daily_avgs = [
-        (datetime.date(2014, 1, 22), 4300.0),
-        (datetime.date(2014, 1, 25), 4600.0),
+        (arrow.get(2014, 1, 22), 4300.0),
+        (arrow.get(2014, 1, 25), 4600.0),
     ]
     river_flow.log = mock.Mock()
     river_flow._interpolate_values = mock.Mock()
     river_flow._interpolate_missing(daily_avgs)
     expected = [
-        (datetime.date(2014, 1, 23), None),
-        (datetime.date(2014, 1, 24), None),
+        (arrow.get(2014, 1, 23), None),
+        (arrow.get(2014, 1, 24), None),
     ]
     assert daily_avgs[1:3] == expected
     expected = [
@@ -216,19 +215,19 @@ def test_interpolate_missing_2_day_gap(river_flow):
 
 def test_interpolate_missing_2_gaps(river_flow):
     daily_avgs = [
-        (datetime.date(2014, 1, 22), 4300.0),
-        (datetime.date(2014, 1, 24), 4500.0),
-        (datetime.date(2014, 1, 25), 4500.0),
-        (datetime.date(2014, 1, 28), 4200.0),
+        (arrow.get(2014, 1, 22), 4300.0),
+        (arrow.get(2014, 1, 24), 4500.0),
+        (arrow.get(2014, 1, 25), 4500.0),
+        (arrow.get(2014, 1, 28), 4200.0),
     ]
     river_flow.log = mock.Mock()
     river_flow._interpolate_values = mock.Mock()
     river_flow._interpolate_missing(daily_avgs)
-    expected = (datetime.date(2014, 1, 23), None)
+    expected = (arrow.get(2014, 1, 23), None)
     assert daily_avgs[1] == expected
     expected = [
-        (datetime.date(2014, 1, 26), None),
-        (datetime.date(2014, 1, 27), None),
+        (arrow.get(2014, 1, 26), None),
+        (arrow.get(2014, 1, 27), None),
     ]
     assert daily_avgs[4:6] == expected
     expected = [
@@ -246,30 +245,30 @@ def test_interpolate_missing_2_gaps(river_flow):
 
 def test_interpolate_values_1_day_gap(river_flow):
     daily_avgs = [
-        (datetime.date(2014, 1, 22), 4300.0),
-        (datetime.date(2014, 1, 23), None),
-        (datetime.date(2014, 1, 24), 4500.0),
+        (arrow.get(2014, 1, 22), 4300.0),
+        (arrow.get(2014, 1, 23), None),
+        (arrow.get(2014, 1, 24), 4500.0),
     ]
     river_flow._interpolate_values(daily_avgs, 1, 1)
-    assert daily_avgs[1] == (datetime.date(2014, 1, 23), 4400.0)
+    assert daily_avgs[1] == (arrow.get(2014, 1, 23), 4400.0)
 
 
 def test_interpolate_values_2_day_gap(river_flow):
     daily_avgs = [
-        (datetime.date(2014, 1, 22), 4300.0),
-        (datetime.date(2014, 1, 23), None),
-        (datetime.date(2014, 1, 24), None),
-        (datetime.date(2014, 1, 25), 4600.0),
+        (arrow.get(2014, 1, 22), 4300.0),
+        (arrow.get(2014, 1, 23), None),
+        (arrow.get(2014, 1, 24), None),
+        (arrow.get(2014, 1, 25), 4600.0),
     ]
     river_flow._interpolate_values(daily_avgs, 1, 2)
     expected = [
-        (datetime.date(2014, 1, 23), 4400.0),
-        (datetime.date(2014, 1, 24), 4500.0),
+        (arrow.get(2014, 1, 23), 4400.0),
+        (arrow.get(2014, 1, 24), 4500.0),
     ]
     assert daily_avgs[1:3] == expected
 
 
 def test_output_results(daily_value_mgr, river_flow, capsys):
-    river_flow._output_results([(datetime.date(2014, 1, 23), 4200.0)])
+    river_flow._output_results([(arrow.get(2014, 1, 23), 4200.0)])
     out, err = capsys.readouterr()
     assert out == '2014 01 23 4.200000e+03\n'

@@ -77,6 +77,7 @@ setup(
         'ecget.app': [
             'air temperature = ecget.SOG_weather:YVRAirTemperature',
             'cloud fraction = ecget.SOG_weather:YVRCloudFraction',
+            'relative humidity = ecget.SOG_weather:YVRRelativeHumidity',
             'river flow = ecget.river:RiverFlow',
             'wind = ecget.SOG_weather:SandHeadsWind',
         ],

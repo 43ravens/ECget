@@ -28,7 +28,8 @@ from . import weather_amqp
 
 __all__ = [
     'SOGWeatherCommandBase',
-    'SandHeadsWind', 'YVRAirTemperature', 'YVRCloudFraction',
+    'SandHeadsWind',
+    'YVRAirTemperature', 'YVRCloudFraction', 'YVRRelativeHumidity',
 ]
 
 
@@ -220,3 +221,28 @@ class YVRCloudFraction(SOGWeatherCommandBase):
                 layers_total += layer_amt
         cloud_fraction = min(layers_total, 10)
         return [(timestamp, cloud_fraction)]
+
+
+class YVRRelativeHumidity(SOGWeatherCommandBase):
+    """Get YVR relative humidity data via AMQP and output hourly values for SOG.
+
+    ECget command plug-in.
+    """
+    QUEUE_NAME_PREFIX = 'cmc.SoG.YVR.relative.humidity'
+    ROUTING_KEY = 'exp.dd.notify.observations.swob-ml.*.CYVR'
+
+    log = logging.getLogger(__name__)
+
+    def handle_msg(self, body):
+        self.log.debug(body)
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.get_data',
+            name='weather',
+            invoke_on_load=True,
+            invoke_args=(body,),
+        )
+        raw_data = mgr.driver.get_data('rel_hum')
+        timestamp = arrow.get(raw_data['timestamp']).to('PST')
+        rel_hum = float(raw_data['rel_hum']['value'])
+        hourly_rel_hum = [(timestamp, rel_hum)]
+        self.output_results(hourly_rel_hum)

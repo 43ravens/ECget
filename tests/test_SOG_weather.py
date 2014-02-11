@@ -52,6 +52,13 @@ def yvr_cf():
         mock.Mock(spec=cliff.app.App), [])
 
 
+@pytest.fixture
+def yvr_rel_hum():
+    import ecget.SOG_weather
+    return ecget.SOG_weather.YVRRelativeHumidity(
+        mock.Mock(spec=cliff.app.App), [])
+
+
 @pytest.mark.use('cmd_base')
 class TestSOGWeatherCommandBase(object):
     def test_get_parser(self, cmd_base):
@@ -232,4 +239,43 @@ class TestYVRAirTemperature(object):
         yvr_air_temp.handle_msg('body')
         yvr_air_temp.output_results.assert_called_once_with(
             [(arrow.get(2014, 2, 11, 11), -3.1)]
+        )
+
+
+@pytest.mark.usefixture('yvr_rel_hum')
+class TestYVRRelativeHumidity(object):
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_log_msg_body_to_debug(self, mock_DM, yvr_rel_hum):
+        yvr_rel_hum.log = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        yvr_rel_hum.log.debug.assert_called_once_with('body')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_driver_mgr(self, mock_DM, yvr_rel_hum):
+        yvr_rel_hum.output_results = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        mock_DM.assert_called_once_with(
+            namespace='ecget.get_data',
+            name='weather',
+            invoke_on_load=True,
+            invoke_args=('body',),
+        )
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_get_data(self, mock_DM, yvr_rel_hum):
+        yvr_rel_hum.output_results = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        mock_DM().driver.get_data.assert_called_once_with('rel_hum')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_processes_raw_data(self, mock_DM, yvr_rel_hum):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 11, 13),
+            'rel_hum': {'value': '83'},
+        }
+        mock_DM().driver.get_data.return_value = raw_data
+        yvr_rel_hum.output_results = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        yvr_rel_hum.output_results.assert_called_once_with(
+            [(arrow.get(2014, 2, 11, 13), 83)]
         )

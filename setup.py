@@ -76,6 +76,7 @@ setup(
         # Sub-command plug-ins:
         'ecget.app': [
             'air temperature = ecget.SOG_weather:YVRAirTemperature',
+            'backfill = ecget.SOG_weather:BackfillSWOBMLs',
             'cloud fraction = ecget.SOG_weather:YVRCloudFraction',
             'relative humidity = ecget.SOG_weather:YVRRelativeHumidity',
             'river flow = ecget.river:RiverFlow',

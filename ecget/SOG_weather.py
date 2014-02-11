@@ -27,6 +27,7 @@ from . import weather_amqp
 
 
 __all__ = [
+    'BackfillSWOBMLs',
     'SOGWeatherCommandBase',
     'SandHeadsWind',
     'YVRAirTemperature', 'YVRCloudFraction', 'YVRRelativeHumidity',
@@ -255,3 +256,40 @@ class YVRRelativeHumidity(SOGWeatherCommandBase):
         except KeyError:
             hourly_rel_hum = []
         self.output_results(hourly_rel_hum)
+
+
+class BackfillSWOBMLs(cliff.command.Command):
+    """Backfill YVR data values from past 30 days SWOB-ML files.
+    """
+    SWOB_DIR = 'http://dd.weather.gc.ca/observations/swob-ml/{date}/CYVR'
+    SWOB_FILE = '{timestamp}-CYVR-MAN-swob.xml'
+
+    handlers = {
+        'at': YVRAirTemperature,
+        'cf': YVRCloudFraction,
+        'rh': YVRRelativeHumidity,
+    }
+
+    def get_parser(self, prog_name):
+        parser = super(BackfillSWOBMLs, self).get_parser(prog_name)
+        parser.add_argument(
+            'quantity',
+            choices=['at', 'cf', 'rh'],
+            help='data quantity to get; '
+                 'at == air temperature, '
+                 'cf == cloud fraction, '
+                 'rh == relative humidity '
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        now = arrow.utcnow()
+        oldest = now.replace(days=-30, hour=0, minute=0)
+        Handler = self.handlers[parsed_args.quantity]
+        handler = Handler(object(), [])
+        for r in arrow.Arrow.range('hour', oldest, now):
+            url = '/'.join((
+                self.SWOB_DIR.format(date=r.format('YYYYMMDD')),
+                self.SWOB_FILE.format(timestamp=r.format('YYYY-MM-DD-HH00'))
+            ))
+            handler.handle_msg(url)

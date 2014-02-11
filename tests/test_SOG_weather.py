@@ -39,6 +39,13 @@ def sh_wind():
 
 
 @pytest.fixture
+def yvr_air_temp():
+    import ecget.SOG_weather
+    return ecget.SOG_weather.YVRAirTemperature(
+        mock.Mock(spec=cliff.app.App), [])
+
+
+@pytest.fixture
 def yvr_cf():
     import ecget.SOG_weather
     return ecget.SOG_weather.YVRCloudFraction(
@@ -187,3 +194,42 @@ class TestYVRCloudFraction(object):
         hourly_cf = yvr_cf._calc_hourly_cloud_fraction(raw_data)
         cf = hourly_cf[0][1]
         assert cf == 7.5
+
+
+@pytest.mark.usefixture('yvr_air_temp')
+class TestYVRAirTemperature(object):
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_log_msg_body_to_debug(self, mock_DM, yvr_air_temp):
+        yvr_air_temp.log = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        yvr_air_temp.log.debug.assert_called_once_with('body')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_driver_mgr(self, mock_DM, yvr_air_temp):
+        yvr_air_temp.output_results = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        mock_DM.assert_called_once_with(
+            namespace='ecget.get_data',
+            name='weather',
+            invoke_on_load=True,
+            invoke_args=('body',),
+        )
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_get_data(self, mock_DM, yvr_air_temp):
+        yvr_air_temp.output_results = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        mock_DM().driver.get_data.assert_called_once_with('air_temp')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_processes_raw_data(self, mock_DM, yvr_air_temp):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 11, 11),
+            'air_temp': {'value': '-3.10'},
+        }
+        mock_DM().driver.get_data.return_value = raw_data
+        yvr_air_temp.output_results = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        yvr_air_temp.output_results.assert_called_once_with(
+            [(arrow.get(2014, 2, 11, 11), -3.1)]
+        )

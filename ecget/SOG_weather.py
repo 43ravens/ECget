@@ -28,7 +28,7 @@ from . import weather_amqp
 
 __all__ = [
     'SOGWeatherCommandBase',
-    'SandHeadsWind', 'YVRCloudFraction',
+    'SandHeadsWind', 'YVRAirTemperature', 'YVRCloudFraction',
 ]
 
 
@@ -141,6 +141,31 @@ class SandHeadsWind(SOGWeatherCommandBase):
         )
         for chunk in mgr.driver.format(hourly_winds):
             sys.stdout.write(chunk)
+
+
+class YVRAirTemperature(SOGWeatherCommandBase):
+    """Get YVR air temperature data via AMQP and output hourly values for SOG.
+
+    ECget command plug-in.
+    """
+    QUEUE_NAME_PREFIX = 'cmc.SoG.YVR.air.temperature'
+    ROUTING_KEY = 'exp.dd.notify.observations.swob-ml.*.CYVR'
+
+    log = logging.getLogger(__name__)
+
+    def handle_msg(self, body):
+        self.log.debug(body)
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.get_data',
+            name='weather',
+            invoke_on_load=True,
+            invoke_args=(body,),
+        )
+        raw_data = mgr.driver.get_data('air_temp')
+        timestamp = arrow.get(raw_data['timestamp']).to('PST')
+        air_temp = float(raw_data['air_temp']['value'])
+        hourly_air_temp = [(timestamp, air_temp)]
+        self.output_results(hourly_air_temp)
 
 
 class YVRCloudFraction(SOGWeatherCommandBase):

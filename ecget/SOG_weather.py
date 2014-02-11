@@ -163,9 +163,12 @@ class YVRAirTemperature(SOGWeatherCommandBase):
             invoke_args=(body,),
         )
         raw_data = mgr.driver.get_data('air_temp')
-        timestamp = arrow.get(raw_data['timestamp']).to('PST')
-        air_temp = float(raw_data['air_temp']['value'])
-        hourly_air_temp = [(timestamp, air_temp)]
+        try:
+            timestamp = arrow.get(raw_data['timestamp']).to('PST')
+            air_temp = float(raw_data['air_temp']['value'])
+            hourly_air_temp = [(timestamp, air_temp)]
+        except KeyError:
+            hourly_air_temp = []
         self.output_results(hourly_air_temp)
 
 
@@ -210,7 +213,10 @@ class YVRCloudFraction(SOGWeatherCommandBase):
         self.output_results(hourly_cf)
 
     def _calc_hourly_cloud_fraction(self, raw_data):
-        timestamp = arrow.get(raw_data['timestamp']).to('PST')
+        try:
+            timestamp = arrow.get(raw_data['timestamp']).to('PST')
+        except KeyError:
+            return []
         layers_total = 0
         for label, attrs in raw_data.items():
             if label == 'tot_cld_amt':
@@ -242,7 +248,10 @@ class YVRRelativeHumidity(SOGWeatherCommandBase):
             invoke_args=(body,),
         )
         raw_data = mgr.driver.get_data('rel_hum')
-        timestamp = arrow.get(raw_data['timestamp']).to('PST')
-        rel_hum = float(raw_data['rel_hum']['value'])
-        hourly_rel_hum = [(timestamp, rel_hum)]
+        try:
+            timestamp = arrow.get(raw_data['timestamp']).to('PST')
+            rel_hum = float(raw_data['rel_hum']['value'])
+            hourly_rel_hum = [(timestamp, rel_hum)]
+        except KeyError:
+            hourly_rel_hum = []
         self.output_results(hourly_rel_hum)

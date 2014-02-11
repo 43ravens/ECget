@@ -174,6 +174,13 @@ class TestYVRCloudFraction(object):
             'tot_cld_amt', label_regexs=['cld_amt_code_[0-9]'],
         )
 
+    def test_calc_cloud_fraction_no_timestamp(self, yvr_cf):
+        raw_data = {
+            'tot_cld_amt': {'value': '10'},
+        }
+        hourly_cf = yvr_cf._calc_hourly_cloud_fraction(raw_data)
+        assert hourly_cf == []
+
     def test_calc_cloud_fraction_timestamp(self, yvr_cf):
         raw_data = {
             'timestamp': arrow.get(2014, 2, 10, 18),
@@ -241,6 +248,26 @@ class TestYVRAirTemperature(object):
             [(arrow.get(2014, 2, 11, 11), -3.1)]
         )
 
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_no_timestamp(self, mock_DM, yvr_air_temp):
+        raw_data = {
+            'air_temp': {'value': '-3.10'},
+        }
+        mock_DM().driver.get_data.return_value = raw_data
+        yvr_air_temp.output_results = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        yvr_air_temp.output_results.assert_called_once_with([])
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_no_air_temp_value(self, mock_DM, yvr_air_temp):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 11, 15),
+        }
+        mock_DM().driver.get_data.return_value = raw_data
+        yvr_air_temp.output_results = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        yvr_air_temp.output_results.assert_called_once_with([])
+
 
 @pytest.mark.usefixture('yvr_rel_hum')
 class TestYVRRelativeHumidity(object):
@@ -279,3 +306,23 @@ class TestYVRRelativeHumidity(object):
         yvr_rel_hum.output_results.assert_called_once_with(
             [(arrow.get(2014, 2, 11, 13), 83)]
         )
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_no_timestamp(self, mock_DM, yvr_rel_hum):
+        raw_data = {
+            'rel_hum': {'value': '83'},
+        }
+        mock_DM().driver.get_data.return_value = raw_data
+        yvr_rel_hum.output_results = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        yvr_rel_hum.output_results.assert_called_once_with([])
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_no_rel_hum_value(self, mock_DM, yvr_rel_hum):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 11, 15),
+        }
+        mock_DM().driver.get_data.return_value = raw_data
+        yvr_rel_hum.output_results = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        yvr_rel_hum.output_results.assert_called_once_with([])

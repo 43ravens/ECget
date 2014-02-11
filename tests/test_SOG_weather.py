@@ -26,42 +26,56 @@ import pytest
 
 
 @pytest.fixture
+def cmd_base():
+    import ecget.SOG_weather
+    return ecget.SOG_weather.SOGWeatherCommandBase(
+        mock.Mock(spec=cliff.app.App), [])
+
+
+@pytest.fixture
 def sh_wind():
     import ecget.SOG_weather
     return ecget.SOG_weather.SandHeadsWind(mock.Mock(spec=cliff.app.App), [])
 
 
-@pytest.mark.usefixture('sh_wind')
-class TestSandHeadsWind(object):
-    def test_get_parser(self, sh_wind):
-        parser = sh_wind.get_parser('ecget wind')
+@pytest.mark.use('cmd_base')
+class TestSOGWeatherCommandBase(object):
+    def test_get_parser(self, cmd_base):
+        parser = cmd_base.get_parser('ecget wind')
         assert parser.prog == 'ecget wind'
 
+    @mock.patch('ecget.weather_amqp.get_queue_name', return_value='foo')
     @mock.patch('ecget.weather_amqp.DatamartConsumer')
-    def test_take_action_makes_consumer(self, mock_DC, sh_wind):
-        sh_wind.take_action(mock.Mock(lifetime=42))
+    def test_take_action_makes_consumer(self, mock_DC, mock_q_name, cmd_base):
+        cmd_base.handle_msg = mock.Mock()
+        cmd_base.take_action(mock.Mock(lifetime=42))
         mock_DC.assert_called_once_with(
-            queue_name='cmc.SoG.SandHeads',
-            routing_key='exp.dd.notify.observations.swob-ml.*.CWVF',
-            msg_handler=sh_wind._handle_msg,
+            queue_name='foo',
+            routing_key=None,
+            msg_handler=cmd_base.handle_msg,
             lifetime=42,
         )
 
+    @mock.patch('ecget.weather_amqp.get_queue_name', return_value='foo')
     @mock.patch('ecget.weather_amqp.DatamartConsumer')
-    def test_take_action_runs_consumer(self, mock_DC, sh_wind):
-        sh_wind.take_action(mock.Mock(lifetime=42))
+    def test_take_action_runs_consumer(self, mock_DC, mock_q_name, cmd_base):
+        cmd_base.handle_msg = mock.Mock()
+        cmd_base.take_action(mock.Mock(lifetime=42))
         mock_DC().run.assert_called_once_with()
 
+
+@pytest.mark.usefixture('sh_wind')
+class TestSandHeadsWind(object):
     @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
     def test_handle_msg_log_msg_body_to_debug(self, mock_DM, sh_wind):
         sh_wind.log = mock.Mock()
-        sh_wind._handle_msg('body')
+        sh_wind.handle_msg('body')
         sh_wind.log.debug.assert_called_once_with('body')
 
     @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
     def test_handle_msg_driver_mgr(self, mock_DM, sh_wind):
-        sh_wind._output_results = mock.Mock()
-        sh_wind._handle_msg('body')
+        sh_wind.output_results = mock.Mock()
+        sh_wind.handle_msg('body')
         mock_DM.assert_called_once_with(
             namespace='ecget.get_data',
             name='wind',
@@ -71,8 +85,8 @@ class TestSandHeadsWind(object):
 
     @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
     def test_handle_msg_get_data(self, mock_DM, sh_wind):
-        sh_wind._output_results = mock.Mock()
-        sh_wind._handle_msg('body')
+        sh_wind.output_results = mock.Mock()
+        sh_wind.handle_msg('body')
         mock_DM().driver.get_data.assert_called_once_with(
             'avg_wnd_spd_10m_mt58-60', 'avg_wnd_dir_10m_mt58-60',
         )

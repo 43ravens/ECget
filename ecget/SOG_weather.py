@@ -27,29 +27,31 @@ from . import weather_amqp
 
 
 __all__ = [
+    'SOGWeatherCommandBase',
     'SandHeadsWind',
 ]
 
 
-class SandHeadsWind(cliff.command.Command):
-    """Get Sand Heads wind data via AMQP and output hourly component
-    values for SOG.
+class SOGWeatherCommandBase(cliff.command.Command):
+    """Base class for SOG weather command plug-ins.
 
-    ECget command plug-in.
+    Sub-classes are expected to provide:
+
+    * :attr:`QUEUE_NAME_PREFIX` class attribute that is the prefix part
+      of the AMQP queue name
+
+    * :attr:`ROUTING_KEY` class attribute that is the routing key for
+       the AMQP queue
+
+    * :meth:`handle_msg` instance method that accepts the AMQP message
+      as an argument and processes it to emit a timestamped weather data
+      value formatted for SOG
     """
-    QUEUE_NAME_PREFIX = 'cmc.SoG.SandHeads'
-    ROUTING_KEY = 'exp.dd.notify.observations.swob-ml.*.CWVF'
-
-    STRAIT_HEADING = math.radians(305)
-
-    log = logging.getLogger(__name__)
+    QUEUE_NAME_PREFIX = None
+    ROUTING_KEY = None
 
     def get_parser(self, prog_name):
-        parser = super(SandHeadsWind, self).get_parser(prog_name)
-        parser.description = (
-            'Get Sand Heads wind data via AMQP and output hourly component '
-            'values for SOG.'
-        )
+        parser = super(SOGWeatherCommandBase, self).get_parser(prog_name)
         parser.add_argument(
             '--lifetime',
             type=int,
@@ -63,12 +65,37 @@ class SandHeadsWind(cliff.command.Command):
         consumer = weather_amqp.DatamartConsumer(
             queue_name=queue_name,
             routing_key=self.ROUTING_KEY,
-            msg_handler=self._handle_msg,
+            msg_handler=self.handle_msg,
             lifetime=parsed_args.lifetime,
         )
         consumer.run()
 
-    def _handle_msg(self, body):
+    def output_results(self, data):
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.formatter',
+            name='weather.hourly',
+            invoke_on_load=True,
+        )
+        for chunk in mgr.driver.format(data):
+            sys.stdout.write(chunk)
+
+    def handle_msg(self, body):
+        raise NotImplemented
+
+
+class SandHeadsWind(SOGWeatherCommandBase):
+    """Get Sand Heads wind data via AMQP and output hourly component values for SOG.
+
+    ECget command plug-in.
+    """
+    QUEUE_NAME_PREFIX = 'cmc.SoG.SandHeads'
+    ROUTING_KEY = 'exp.dd.notify.observations.swob-ml.*.CWVF'
+
+    STRAIT_HEADING = math.radians(305)
+
+    log = logging.getLogger(__name__)
+
+    def handle_msg(self, body):
         self.log.debug(body)
         mgr = stevedore.driver.DriverManager(
             namespace='ecget.get_data',
@@ -79,7 +106,7 @@ class SandHeadsWind(cliff.command.Command):
         raw_data = mgr.driver.get_data(
             'avg_wnd_spd_10m_mt58-60', 'avg_wnd_dir_10m_mt58-60')
         hourly_winds = self._calc_hourly_winds(raw_data)
-        self._output_results(hourly_winds)
+        self.output_results(hourly_winds)
 
     def _calc_hourly_winds(self, raw_data):
         timestamp = arrow.get(raw_data['timestamp']).to('PST')
@@ -106,7 +133,7 @@ class SandHeadsWind(cliff.command.Command):
         along_wind = -along_wind
         return [(timestamp, (cross_wind, along_wind))]
 
-    def _output_results(self, hourly_winds):
+    def output_results(self, hourly_winds):
         mgr = stevedore.driver.DriverManager(
             namespace='ecget.formatter',
             name='wind.hourly.components',

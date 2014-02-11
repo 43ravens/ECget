@@ -38,6 +38,13 @@ def sh_wind():
     return ecget.SOG_weather.SandHeadsWind(mock.Mock(spec=cliff.app.App), [])
 
 
+@pytest.fixture
+def yvr_cf():
+    import ecget.SOG_weather
+    return ecget.SOG_weather.YVRCloudFraction(
+        mock.Mock(spec=cliff.app.App), [])
+
+
 @pytest.mark.use('cmd_base')
 class TestSOGWeatherCommandBase(object):
     def test_get_parser(self, cmd_base):
@@ -124,3 +131,59 @@ class TestSandHeadsWind(object):
         along_wind = hourly_winds[0][1][1]
         expected = -1
         assert abs(along_wind - expected) < 1e-4
+
+
+@pytest.mark.usefixture('yvr_cf')
+class TestYVRCloudFraction(object):
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_log_msg_body_to_debug(self, mock_DM, yvr_cf):
+        yvr_cf.log = mock.Mock()
+        yvr_cf.handle_msg('body')
+        yvr_cf.log.debug.assert_called_once_with('body')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_driver_mgr(self, mock_DM, yvr_cf):
+        yvr_cf.output_results = mock.Mock()
+        yvr_cf.handle_msg('body')
+        mock_DM.assert_called_once_with(
+            namespace='ecget.get_data',
+            name='weather',
+            invoke_on_load=True,
+            invoke_args=('body',),
+        )
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_get_data(self, mock_DM, yvr_cf):
+        yvr_cf.output_results = mock.Mock()
+        yvr_cf.handle_msg('body')
+        mock_DM().driver.get_data.assert_called_once_with(
+            'tot_cld_amt', label_regexs=['cld_amt_code_[0-9]'],
+        )
+
+    def test_calc_cloud_fraction_timestamp(self, yvr_cf):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 10, 18),
+            'tot_cld_amt': {'value': '10'},
+        }
+        hourly_cf = yvr_cf._calc_hourly_cloud_fraction(raw_data)
+        timestamp = hourly_cf[0][0]
+        assert timestamp == arrow.get(2014, 2, 10, 18).to('PST')
+
+    def test_calc_cloud_fraction_tot_cld_amt(self, yvr_cf):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 10, 18),
+            'tot_cld_amt': {'value': '42'},
+        }
+        hourly_cf = yvr_cf._calc_hourly_cloud_fraction(raw_data)
+        cf = hourly_cf[0][1]
+        assert cf == 4.2
+
+    def test_calc_cloud_fraction_cld_amt_codes(self, yvr_cf):
+        raw_data = {
+            'timestamp': arrow.get(2014, 2, 10, 18),
+            'cld_amt_code_1': {'value': '33'},
+            'cld_amt_code_2': {'value': '35'},
+        }
+        hourly_cf = yvr_cf._calc_hourly_cloud_fraction(raw_data)
+        cf = hourly_cf[0][1]
+        assert cf == 7.5

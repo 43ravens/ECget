@@ -77,17 +77,20 @@ setup(
         'ecget.app': [
             'river flow = ecget.river:RiverFlow',
             'wind = ecget.SOG_weather:SandHeadsWind',
+            'cloud fraction = ecget.SOG_weather:YVRCloudFraction',
         ],
         # Data getter drivers:
         'ecget.get_data': [
             'river.discharge = ecget.river:RiverDischarge',
             'wind = ecget.weather_datamart:DatamartWeather',
+            'weather = ecget.weather_datamart:DatamartWeather',
         ],
         # Output formatters:
         'ecget.formatter': [
             'river.daily_avg_flow = ecget.SOG_formatters:DailyValue',
             ('wind.hourly.components = '
                 'ecget.SOG_formatters:HourlyWindComponents'),
+            'weather.hourly = ecget.SOG_formatters:HourlyValue',
         ],
     },
 )

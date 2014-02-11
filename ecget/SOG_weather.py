@@ -28,7 +28,7 @@ from . import weather_amqp
 
 __all__ = [
     'SOGWeatherCommandBase',
-    'SandHeadsWind',
+    'SandHeadsWind', 'YVRCloudFraction',
 ]
 
 
@@ -141,3 +141,57 @@ class SandHeadsWind(SOGWeatherCommandBase):
         )
         for chunk in mgr.driver.format(hourly_winds):
             sys.stdout.write(chunk)
+
+
+class YVRCloudFraction(SOGWeatherCommandBase):
+    """Get YVR cloud fraction data via AMQP and output hourly values for SOG.
+
+    ECget command plug-in.
+    """
+    QUEUE_NAME_PREFIX = 'cmc.SoG.YVR.clouds'
+    ROUTING_KEY = 'exp.dd.notify.observations.swob-ml.*.CYVR'
+
+    log = logging.getLogger(__name__)
+
+    # Mapping from EC cloud amount codes to 10ths of cloud fraction
+    # Ref: http://dd.weather.gc.ca/observations/doc/SWOB-ML_Product_User_Guide_v6.0_e.pdf
+    # pg 86
+    CF_MAPPING = {
+        '0': 0,
+        '32': 1,
+        '33': 2.5,
+        '34': 4,
+        '35': 5,
+        '36': 6,
+        '37': 7.5,
+        '38': 9,
+        '39': 10,
+    }
+
+    def handle_msg(self, body):
+        self.log.debug(body)
+        mgr = stevedore.driver.DriverManager(
+            namespace='ecget.get_data',
+            name='weather',
+            invoke_on_load=True,
+            invoke_args=(body,),
+        )
+        raw_data = mgr.driver.get_data(
+            'tot_cld_amt',
+            label_regexs=['cld_amt_code_[0-9]'],
+        )
+        hourly_cf = self._calc_hourly_cloud_fraction(raw_data)
+        self.output_results(hourly_cf)
+
+    def _calc_hourly_cloud_fraction(self, raw_data):
+        timestamp = arrow.get(raw_data['timestamp']).to('PST')
+        layers_total = 0
+        for label, attrs in raw_data.items():
+            if label == 'tot_cld_amt':
+                cloud_fraction = int(attrs['value']) / 10
+                return [(timestamp, cloud_fraction)]
+            if label.startswith('cld_amt_code_'):
+                layer_amt = self.CF_MAPPING[attrs['value']]
+                layers_total += layer_amt
+        cloud_fraction = min(layers_total, 10)
+        return [(timestamp, cloud_fraction)]

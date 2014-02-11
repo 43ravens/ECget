@@ -154,13 +154,14 @@ def test_get_queue_name_creates_queue_file(get_queue_name):
     m_open.assert_called_once_with('./queues/foo', 'wt')
 
 
-def test_get_queue_name_writes_queue_name_to_file(get_queue_name):
+@mock.patch('ecget.weather_amqp.uuid.uuid4', return_value='uuid')
+def test_get_queue_name_writes_queue_name_to_file(mock_uuid4, get_queue_name):
     m_open = mock.mock_open()
     with mock.patch('ecget.weather_amqp.os.path.exists', return_value=False):
         with mock.patch('ecget.weather_amqp.os.mkdir'):
             with mock.patch('ecget.weather_amqp.open', m_open, create=True):
                 get_queue_name('foo')
-    m_open().write.assert_called_once_with('foo')
+    m_open().write.assert_called_once_with('foo.uuid')
 
 
 def test_get_queue_name_returns_queue_name_from_file(get_queue_name):

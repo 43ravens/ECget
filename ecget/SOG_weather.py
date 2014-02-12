@@ -75,7 +75,7 @@ class SOGWeatherCommandBase(cliff.command.Command):
     def output_results(self, data):
         mgr = stevedore.driver.DriverManager(
             namespace='ecget.formatter',
-            name='weather.hourly',
+            name='SOG.weather.hourly',
             invoke_on_load=True,
         )
         for chunk in mgr.driver.format(data):
@@ -138,7 +138,7 @@ class SandHeadsWind(SOGWeatherCommandBase):
     def output_results(self, hourly_winds):
         mgr = stevedore.driver.DriverManager(
             namespace='ecget.formatter',
-            name='wind.hourly.components',
+            name='SOG.wind.hourly.components',
             invoke_on_load=True,
         )
         for chunk in mgr.driver.format(hourly_winds):

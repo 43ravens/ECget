@@ -170,7 +170,7 @@ class RiverFlow(cliff.command.Command):
     def _output_results(self, daily_avgs):
         mgr = stevedore.driver.DriverManager(
             namespace='ecget.formatter',
-            name='river.daily_avg_flow',
+            name='SOG.river.daily_avg_flow',
             invoke_on_load=True,
         )
         for chunk in mgr.driver.format(daily_avgs):

@@ -90,9 +90,9 @@ setup(
         ],
         # Output formatters:
         'ecget.formatter': [
-            'river.daily_avg_flow = ecget.SOG_formatters:DailyValue',
-            'weather.hourly = ecget.SOG_formatters:HourlyValue',
-            ('wind.hourly.components = '
+            'SOG.river.daily_avg_flow = ecget.SOG_formatters:DailyValue',
+            'SOG.weather.hourly = ecget.SOG_formatters:HourlyValue',
+            ('SOG.wind.hourly.components = '
                 'ecget.SOG_formatters:HourlyWindComponents'),
         ],
     },

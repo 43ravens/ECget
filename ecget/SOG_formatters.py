@@ -32,7 +32,7 @@ class FormatterBase(object):
         """Format the data and return a line of text.
 
         :arg data: An iterable of 2-tuples containing dates or datetimes
-        and data values.
+                   and data values.
 
         :returns: Iterable producing the formatted text.
         """
@@ -65,7 +65,7 @@ class HourlyValue(FormatterBase):
         """Format the data and return a line of text.
 
         :arg data: An iterable of 2-tuples containing timestamps
-        and data values.
+                   and data values.
 
         :returns: Iterable producing the formatted text.
         """

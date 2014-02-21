@@ -87,7 +87,7 @@ class DatamartWeather(DatamartWeatherBase):
         if re.search(pattern, self.url) is not None:
             return self.url
 
-    def get_data(self, *labels, label_regexs=[]):
+    def get_data(self, label_regexs=[], *labels):
         """Get the SWOB-ML data for the specified labels.
 
         :arg *labels: List of SWOB-ML label strings to get data for.

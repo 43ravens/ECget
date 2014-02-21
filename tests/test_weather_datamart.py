@@ -28,6 +28,58 @@ def dd_weather():
     return ecget.weather_datamart.DatamartWeather('url')
 
 
+@pytest.mark.parametrize(
+    'url', [
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-0000-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-0900-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-1400-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-2000-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-2300-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-1400-CYVR-MAN-COR1-swob.xml'),
+        ('http://-1800-swob.xml'),
+    ]
+)
+def test_filter_match(url, dd_weather):
+    dd_weather.url = url
+    pattern = (
+        r'.-'
+        '([0-1]\d|'
+        '2[0-3])'
+        '00-.'
+    )
+    result = dd_weather.filter(pattern)
+    assert result == url
+
+
+@pytest.mark.parametrize(
+    'url', [
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-0001-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-2359-CYVR-MAN-swob.xml'),
+        ('http://dd.weather.gc.ca/observations/swob-ml/20140220/CYVR/'
+         '2014-02-20-1423-CYVR-MAN-COR1-swob.xml'),
+        ('http://-1823-swob.xml'),
+    ]
+)
+def test_filter_no_match(url, dd_weather):
+    dd_weather.url = url
+    pattern = (
+        r'.-'
+        '([0-1]\d|'
+        '2[0-3])'
+        '00-.'
+    )
+    result = dd_weather.filter(pattern)
+    assert result is None
+
+
 @mock.patch('ecget.weather_datamart.requests.get')
 @mock.patch('ecget.weather_datamart.ET')
 def test_get_data_no_elements(mock_ET, mock_resp, dd_weather):

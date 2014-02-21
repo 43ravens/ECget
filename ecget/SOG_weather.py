@@ -163,6 +163,14 @@ class YVRAirTemperature(SOGWeatherCommandBase):
             invoke_on_load=True,
             invoke_args=(body,),
         )
+        pattern = (
+            r'.-'
+            '([0-1]\d|'
+            '2[0-3])'
+            '00-.'
+        )
+        if mgr.driver.filter(pattern) is None:
+            return
         raw_data = mgr.driver.get_data('air_temp')
         try:
             timestamp = arrow.get(raw_data['timestamp']).to('PST')
@@ -206,6 +214,14 @@ class YVRCloudFraction(SOGWeatherCommandBase):
             invoke_on_load=True,
             invoke_args=(body,),
         )
+        pattern = (
+            r'.-'
+            '([0-1]\d|'
+            '2[0-3])'
+            '00-.'
+        )
+        if mgr.driver.filter(pattern) is None:
+            return
         raw_data = mgr.driver.get_data(
             'tot_cld_amt',
             label_regexs=['cld_amt_code_[0-9]'],
@@ -248,6 +264,14 @@ class YVRRelativeHumidity(SOGWeatherCommandBase):
             invoke_on_load=True,
             invoke_args=(body,),
         )
+        pattern = (
+            r'.-'
+            '([0-1]\d|'
+            '2[0-3])'
+            '00-.'
+        )
+        if mgr.driver.filter(pattern) is None:
+            return
         raw_data = mgr.driver.get_data('rel_hum')
         try:
             timestamp = arrow.get(raw_data['timestamp']).to('PST')

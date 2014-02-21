@@ -39,12 +39,12 @@ class DatamartWeatherBase(object):
     def __init__(self, url):
         self.url = url
 
-    def filter(self, criterion):
-        """Check URL against criterion to ensure that only URLs for data
+    def filter(self, pattern):
+        """Check URL against pattern to ensure that only URLs for data
         of interest are processed.
 
-        :arg criterion:
-        :type criterion:
+        :arg pattern: Regular expression pattern to check URL against.
+        :type pattern: str
 
         :returns: URL or :py:obj:`None`
         """
@@ -75,10 +75,17 @@ class DatamartWeather(DatamartWeatherBase):
 
     log = logging.getLogger(__name__)
 
-    def filter(self, criterion):
+    def filter(self, pattern):
+        """Check URL against pattern to ensure that only URLs for data
+        of interest are processed.
+
+        :arg pattern: Regular expression pattern to check URL against.
+        :type pattern: str
+
+        :returns: URL or :py:obj:`None`
         """
-        """
-        pass
+        if re.search(pattern, self.url) is not None:
+            return self.url
 
     def get_data(self, *labels, label_regexs=[]):
         """Get the SWOB-ML data for the specified labels.

@@ -167,6 +167,28 @@ class TestYVRCloudFraction(object):
         )
 
     @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter(self, mock_DM, yvr_cf):
+        yvr_cf.output_results = mock.Mock()
+        yvr_cf.handle_msg('body')
+        mock_DM().driver.filter.assert_called_once()
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter_passes_msg(self, mock_DM, yvr_cf):
+        yvr_cf.output_results = mock.Mock()
+        mock_DM().driver.filter.return_value = 'body'
+        yvr_cf.handle_msg('body')
+        mock_DM().driver.get_data.assert_called_once_with(
+            'tot_cld_amt', label_regexs=['cld_amt_code_[0-9]'],
+        )
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter_blocks_msg(self, mock_DM, yvr_cf):
+        yvr_cf.output_results = mock.Mock()
+        mock_DM().driver.filter.return_value = None
+        yvr_cf.handle_msg('body')
+        assert not mock_DM().driver.get_data.called
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
     def test_handle_msg_get_data(self, mock_DM, yvr_cf):
         yvr_cf.output_results = mock.Mock()
         yvr_cf.handle_msg('body')
@@ -230,6 +252,26 @@ class TestYVRAirTemperature(object):
         )
 
     @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter(self, mock_DM, yvr_air_temp):
+        yvr_air_temp.output_results = mock.Mock()
+        yvr_air_temp.handle_msg('body')
+        mock_DM().driver.filter.assert_called_once()
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter_passes_msg(self, mock_DM, yvr_air_temp):
+        yvr_air_temp.output_results = mock.Mock()
+        mock_DM().driver.filter.return_value = 'body'
+        yvr_air_temp.handle_msg('body')
+        mock_DM().driver.get_data.assert_called_once_with('air_temp')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter_blocks_msg(self, mock_DM, yvr_air_temp):
+        yvr_air_temp.output_results = mock.Mock()
+        mock_DM().driver.filter.return_value = None
+        yvr_air_temp.handle_msg('body')
+        assert not mock_DM().driver.get_data.called
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
     def test_handle_msg_get_data(self, mock_DM, yvr_air_temp):
         yvr_air_temp.output_results = mock.Mock()
         yvr_air_temp.handle_msg('body')
@@ -287,6 +329,26 @@ class TestYVRRelativeHumidity(object):
             invoke_on_load=True,
             invoke_args=('body',),
         )
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter(self, mock_DM, yvr_rel_hum):
+        yvr_rel_hum.output_results = mock.Mock()
+        yvr_rel_hum.handle_msg('body')
+        mock_DM().driver.filter.assert_called_once()
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter_passes_msg(self, mock_DM, yvr_rel_hum):
+        yvr_rel_hum.output_results = mock.Mock()
+        mock_DM().driver.filter.return_value = 'body'
+        yvr_rel_hum.handle_msg('body')
+        mock_DM().driver.get_data.assert_called_once_with('rel_hum')
+
+    @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
+    def test_handle_msg_filter_blocks_msg(self, mock_DM, yvr_rel_hum):
+        yvr_rel_hum.output_results = mock.Mock()
+        mock_DM().driver.filter.return_value = None
+        yvr_rel_hum.handle_msg('body')
+        assert not mock_DM().driver.get_data.called
 
     @mock.patch('ecget.SOG_weather.stevedore.driver.DriverManager')
     def test_handle_msg_get_data(self, mock_DM, yvr_rel_hum):

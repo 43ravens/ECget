@@ -39,6 +39,7 @@ class DatamartWeatherBase(object):
     def __init__(self, url):
         self.url = url
 
+    @abc.abstractmethod
     def filter(self, pattern):
         """Check URL against pattern to ensure that only URLs for data
         of interest are processed.
@@ -49,10 +50,14 @@ class DatamartWeatherBase(object):
         :returns: URL or :py:obj:`None`
         """
 
-    def get_data(self, *labels):
+    @abc.abstractmethod
+    def get_data(self, *labels, **kwargs):
         """Get the SWOB-ML data for the specified labels.
 
         :arg *labels: List of SWOB-ML label strings to get data for.
+
+        :arg label_regexs: List of regular expression patterns to
+                           match element names against to get data.
 
         :returns: Dictionary of SWOB-ML attributes and values found for
                   each label.
@@ -87,7 +92,7 @@ class DatamartWeather(DatamartWeatherBase):
         if re.search(pattern, self.url) is not None:
             return self.url
 
-    def get_data(self, label_regexs=[], *labels):
+    def get_data(self, *labels, **kwargs):
         """Get the SWOB-ML data for the specified labels.
 
         :arg *labels: List of SWOB-ML label strings to get data for.
@@ -101,6 +106,11 @@ class DatamartWeather(DatamartWeatherBase):
                   and the values are dicts of the attributes and their
                   values.
         """
+        if 'label_regexs' in kwargs:
+            label_regexs = kwargs['label_regexs']
+        else:
+            label_regexs = []
+
         def interesting(elements):
             for el in elements:
                 name = el.attrib['name']

@@ -204,3 +204,27 @@ def test_get_data_element_data_matches_label_regex(
     mock_ET.fromstring.return_value = mock_root
     data = dd_weather.get_data(label_regexs=['rel_\w{3}'])
     assert data['rel_hum'] == {'value': '100', 'uom': '%'}
+
+
+@mock.patch('ecget.weather_datamart.requests.get')
+@mock.patch('ecget.weather_datamart.ET')
+def test_get_data_element_data_matches_label_and_regex(
+    mock_ET, mock_resp, dd_weather,
+):
+    id_elements = mock.Mock(
+        attrib={'name': 'date_tm', 'value': '2014-02-06T18:00:00.000Z'}
+    )
+    data_elements = [
+        mock.Mock(attrib={'value': '100', 'name': 'rel_hum', 'uom': '%'}),
+        mock.Mock(attrib={'value': '5.3', 'name': 'air_temp', 'uom': 'C'}),
+    ]
+    mock_root_iter = mock.Mock(
+        side_effect=[
+            [[id_elements]],
+            [data_elements],
+        ])
+    mock_root = mock.Mock(iter=mock_root_iter)
+    mock_ET.fromstring.return_value = mock_root
+    data = dd_weather.get_data('air_temp', label_regexs=['rel_\w{3}'])
+    assert data['rel_hum'] == {'value': '100', 'uom': '%'}
+    assert data['air_temp'] == {'value': '5.3', 'uom': 'C'}

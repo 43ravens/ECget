@@ -54,7 +54,7 @@ class DatamartWeatherBase(object):
     def get_data(self, *labels, **kwargs):
         """Get the SWOB-ML data for the specified labels.
 
-        :arg *labels: List of SWOB-ML label strings to get data for.
+        :arg labels: List of SWOB-ML label strings to get data for.
 
         :arg label_regexs: List of regular expression patterns to
                            match element names against to get data.
@@ -95,7 +95,7 @@ class DatamartWeather(DatamartWeatherBase):
     def get_data(self, *labels, **kwargs):
         """Get the SWOB-ML data for the specified labels.
 
-        :arg *labels: List of SWOB-ML label strings to get data for.
+        :arg labels: List of SWOB-ML label strings to get data for.
 
         :arg label_regexs: List of regular expression patterns to
                            match element names against to get data.

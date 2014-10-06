@@ -15,8 +15,8 @@ ECget is written in Python and is designed to be easily extensible for use in ot
 Documentation for the project is included in the docs/ directory and is rendered at http://ecget.readthedocs.org/.
 
 .. image:: https://readthedocs.org/projects/ecget/badge/?version=latest
-:target: https://readthedocs.org/projects/ecget/?badge=latest
-:alt: Documentation Status
+    :target: https://readthedocs.org/projects/ecget/?badge=latest
+    :alt: Documentation Status
 
 
 License

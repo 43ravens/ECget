@@ -182,14 +182,15 @@ class RiverDataBase(object):
     """
     DISCLAIMER_URL = 'http://www.wateroffice.ec.gc.ca/include/disclaimer.php'
     DISCLAIMER_ACTION = {'disclaimer_action': 'I Agree'}
-    DATA_URL = 'http://www.wateroffice.ec.gc.ca/graph/graph_e.html'
+    DATA_URL = 'http://www.wateroffice.ec.gc.ca/report/report_e.html'
     PARAM_IDS = {
-        'discharge': 6,
+        'discharge': 47,
     }
 
     def __init__(self, param):
         self.params = {
-            'mode': 'text',
+            'mode': 'Table',
+            'type': 'realTime',
             'prm1': self.PARAM_IDS[param],
         }
 
@@ -213,12 +214,8 @@ class RiverDataBase(object):
         last_date = end_date.replace(days=+1)
         self.params.update({
             'stn': station_id,
-            'syr': start_date.year,
-            'smo': start_date.month,
-            'sday': start_date.day,
-            'eyr': last_date.year,
-            'emo': last_date.month,
-            'eday': last_date.day,
+            'startDate': start_date.format('YYYY-MM-DD'),
+            'endDate': last_date.format('YYYY-MM-DD'),
         })
         with requests.session() as s:
             s.post(self.DISCLAIMER_URL, data=self.DISCLAIMER_ACTION)

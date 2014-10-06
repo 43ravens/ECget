@@ -180,9 +180,8 @@ class RiverFlow(cliff.command.Command):
 class RiverDataBase(object):
     """Base class for EC river data site drivers.
     """
-    DISCLAIMER_URL = 'http://www.wateroffice.ec.gc.ca/include/disclaimer.php'
-    DISCLAIMER_ACTION = {'disclaimer_action': 'I Agree'}
-    DATA_URL = 'http://www.wateroffice.ec.gc.ca/report/report_e.html'
+    DATA_URL = 'http://wateroffice.ec.gc.ca/report/report_e.html'
+    DISCLAIMER_COOKIE = {'disclaimer': 'agree'}
     PARAM_IDS = {
         'discharge': 47,
     }
@@ -217,10 +216,8 @@ class RiverDataBase(object):
             'startDate': start_date.format('YYYY-MM-DD'),
             'endDate': last_date.format('YYYY-MM-DD'),
         })
-        with requests.session() as s:
-            s.post(self.DISCLAIMER_URL, data=self.DISCLAIMER_ACTION)
-            time.sleep(2)
-            response = s.get(self.DATA_URL, params=self.params)
+        response = requests.get(
+            self.DATA_URL, params=self.params, cookies=self.DISCLAIMER_COOKIE)
         soup = bs4.BeautifulSoup(response.content)
         return soup.find('table', id='dataTable')
 

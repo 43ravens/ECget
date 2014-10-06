@@ -219,7 +219,7 @@ class RiverDataBase(object):
         response = requests.get(
             self.DATA_URL, params=self.params, cookies=self.DISCLAIMER_COOKIE)
         soup = bs4.BeautifulSoup(response.content)
-        return soup.find('table', id='dataTable')
+        return soup.find('table')
 
 
 class RiverDischarge(RiverDataBase):

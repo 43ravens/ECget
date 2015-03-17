@@ -191,6 +191,7 @@ class RiverDataBase(object):
             'mode': 'Table',
             'type': 'realTime',
             'prm1': self.PARAM_IDS[param],
+            'prm2': -1,
         }
 
     def get_data(self, station_id, start_date, end_date):

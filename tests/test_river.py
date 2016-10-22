@@ -85,7 +85,7 @@ def test_calc_daily_avgs_1_row(river_flow):
           </tr>
         </table>
     '''
-    raw_data = bs4.BeautifulSoup(html)
+    raw_data = bs4.BeautifulSoup(html, 'html.parser')
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 22))
     assert daily_avgs == [(arrow.get(2014, 1, 21), 4200.0)]
 
@@ -103,7 +103,7 @@ def test_calc_daily_avgs_2_rows_1_day(river_flow):
           </tr>
         </table>
     '''
-    raw_data = bs4.BeautifulSoup(html)
+    raw_data = bs4.BeautifulSoup(html, 'html.parser')
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 22))
     assert daily_avgs == [(arrow.get(2014, 1, 21), 4300.0)]
 
@@ -121,7 +121,7 @@ def test_calc_daily_avgs_2_rows_2_days(river_flow):
           </tr>
         </table>
     '''
-    raw_data = bs4.BeautifulSoup(html)
+    raw_data = bs4.BeautifulSoup(html, 'html.parser')
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 23))
     expected = [
         (arrow.get(2014, 1, 21), 4200.0),
@@ -143,7 +143,7 @@ def test_calc_daily_avgs_end_date(river_flow):
           </tr>
         </table>
     '''
-    raw_data = bs4.BeautifulSoup(html)
+    raw_data = bs4.BeautifulSoup(html, 'html.parser')
     daily_avgs = river_flow._calc_daily_avgs(raw_data, arrow.get(2014, 1, 21))
     assert daily_avgs == [(arrow.get(2014, 1, 21), 4200.0)]
 

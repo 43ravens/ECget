@@ -17,7 +17,6 @@ value(s) for SOG.
 """
 import datetime
 import logging
-import time
 import sys
 
 import arrow

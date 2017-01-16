@@ -24,7 +24,7 @@ import sys
 import cliff.app
 import cliff.commandmanager
 
-from . import __pkg_metadata__
+from ecget import __pkg_metadata__
 
 
 __all__ = [

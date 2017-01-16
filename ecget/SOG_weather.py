@@ -24,7 +24,7 @@ import arrow
 import cliff
 import stevedore.driver
 
-from . import weather_amqp
+from ecget import weather_amqp
 
 
 __all__ = [

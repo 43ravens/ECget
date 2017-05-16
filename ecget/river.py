@@ -127,10 +127,10 @@ class RiverFlow(cliff.command.Command):
         the end of the string.
         """
         try:
-            return float(flow_string)
+            return float(flow_string.replace(',', ''))
         except ValueError:
             # Ignore training `*`
-            return float(flow_string[:-1])
+            return float(flow_string.replace(',', '')[:-1])
 
     def _interpolate_missing(self, daily_avgs):
         """Fill in any missing data values by linear interpolation.

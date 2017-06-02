@@ -1,0 +1,34 @@
+# conda environment description file for ECget package
+# development environment
+
+name: ecget
+
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - beautifulsoup4
+  - pip
+  - python=3.6
+  - requests
+
+  # For unit tests
+  - coverage
+  - pytest
+
+  # For documentation
+  - sphinx
+  - sphinx_rtd_theme
+
+  # For exploration
+  - ipython
+  - jupyter
+
+  - pip:
+    - arrow
+    - cliff
+    - kombu
+
+    # For coding style
+    - yapf

@@ -78,18 +78,22 @@ setup(
             'air temperature = ecget.SOG_weather:YVRAirTemperature',
             'backfill = ecget.SOG_weather:BackfillSWOBMLs',
             'cloud fraction = ecget.SOG_weather:YVRCloudFraction',
+            'fraser water quality = ecget.fraser_buoy:FraserWaterQuality',
             'relative humidity = ecget.SOG_weather:YVRRelativeHumidity',
             'river flow = ecget.river:RiverFlow',
             'wind = ecget.SOG_weather:SandHeadsWind',
         ],
         # Data getter drivers:
         'ecget.get_data': [
+            'fraser.water_quality = ecget.fraser_buoy:FraserWaterQualityData',
             'river.discharge = ecget.river:RiverDischarge',
             'weather = ecget.weather_datamart:DatamartWeather',
             'wind = ecget.weather_datamart:DatamartWeather',
         ],
         # Output formatters:
         'ecget.formatter': [
+            ('fraser.water_quality.csv = '
+                'ecget.fraser_buoy:FraserWaterQualityCSV'),
             'SOG.river.daily_avg_flow = ecget.SOG_formatters:DailyValue',
             'SOG.weather.hourly = ecget.SOG_formatters:HourlyValue',
             ('SOG.wind.hourly.components = '

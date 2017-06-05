@@ -88,8 +88,12 @@ class FraserWaterQuality(cliff.command.Command):
             '{0.stream_velocity_direction}'.format(data))
         parts = data_soup.find(
             'span', {'id': 'MainContent_windDirection'}).text.split()
-        data.wind_direction = ' '.join(parts[:2]).lower()
-        data.wind_bearing = parts[-1].replace('(', '').replace(')', '')
+        try:
+            data.wind_direction = ' '.join(parts[:2]).lower()
+            data.wind_bearing = parts[-1].replace('(', '').replace(')', '')
+        except IndexError:
+            # No wind direction data
+            data.wind_direction, data.wind_bearing = 'n/a', 'n/a'
         self.log.debug(
             'wind_direction: {0.wind_direction} {0.wind_bearing}'.format(data))
         return data

@@ -71,9 +71,19 @@ class FraserWaterQuality(cliff.command.Command):
             'atm_pressure': 'MainContent_pressure',
         }
         for qty, id in scalar_data.items():
-            value, units = self._parse_scalar(data_soup, id)
-            setattr(data, qty, value)
-            setattr(data, '{}_units'.format(qty), units)
+            try:
+                value, units = self._parse_scalar(data_soup, id)
+                setattr(data, qty, value)
+                setattr(data, '{}_units'.format(qty), units)
+            except ValueError:
+                # No data value or units
+                logging.warning(
+                    'invalid {0} data: {1}'
+                    .format(qty, data_soup.find('span', {'id': id})
+                    .parent.text))
+                setattr(data, qty, 'n/a')
+                setattr(data, '{}_units'.format(qty), 'n/a')
+                data.wind_direction, data.wind_bearing = 'n/a', 'n/a'
             self.log.debug('{0}: {1} {2}'.format(qty, value, units))
         data.pH = float(data_soup.find('span', {'id': 'MainContent_pH'}).text)
         data.pH_scale = 'NIST'
@@ -107,8 +117,8 @@ class FraserWaterQuality(cliff.command.Command):
         sys.stdout.write(csv_line)
 
     def _parse_scalar(self, data_soup, data_id):
-        value, units = data_soup.find('span', {'id':
-                                               data_id}).parent.text.split()
+        value, units = data_soup.find(
+            'span', {'id': data_id}).parent.text.split()
         return float(value), units
 
 

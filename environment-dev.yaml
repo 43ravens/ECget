@@ -4,8 +4,8 @@
 name: ecget
 
 channels:
-  - defaults
   - conda-forge
+  - defaults
 
 dependencies:
   - beautifulsoup4

@@ -53,7 +53,7 @@ class FraserWaterQuality(cliff.command.Command):
         data_soup = mgr.driver.get_data()
         data = SimpleNamespace()
         last_update_time = arrow.get(
-            data_soup.find('span', {'id': 'MainContent_LastUpdateTime'}).text)
+            data_soup.find('span', {'id': 'mainContentTime_LastUpdateTime'}).text)
         data.last_update_time = arrow.get(last_update_time.datetime,
                                           tz.gettz('Canada/Pacific'))
         self.log.debug(

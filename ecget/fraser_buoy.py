@@ -90,9 +90,14 @@ class FraserWaterQuality(cliff.command.Command):
         self.log.debug('pH: {0.pH} {0.pH_scale}'.format(data))
         parts = data_soup.find(
             'span', {'id': 'MainContent_waterVelocity'}).text.split()
-        data.stream_velocity = float(parts[0])
-        data.stream_velocity_units = parts[1]
-        data.stream_velocity_direction = ' '.join(parts[2:]).lower()
+        try:
+            data.stream_velocity = float(parts[0])
+            data.stream_velocity_units = parts[1]
+            data.stream_velocity_direction = ' '.join(parts[2:]).lower()
+        except IndexError:
+            # No stream velocity data
+            data.stream_velocity, data.stream_velocity_units = 'n/a', 'n/a'
+            data.stream_velocity_direction = 'n/a'
         self.log.debug(
             'stream_velocity: {0.stream_velocity} {0.stream_velocity_units} '
             '{0.stream_velocity_direction}'.format(data))

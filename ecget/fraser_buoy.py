@@ -83,7 +83,6 @@ class FraserWaterQuality(cliff.command.Command):
                     .parent.text))
                 setattr(data, qty, 'n/a')
                 setattr(data, '{}_units'.format(qty), 'n/a')
-                data.wind_direction, data.wind_bearing = 'n/a', 'n/a'
             self.log.debug('{0}: {1} {2}'.format(qty, value, units))
         data.pH = float(data_soup.find('span', {'id': 'MainContent_pH'}).text)
         data.pH_scale = 'NIST'

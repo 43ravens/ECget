@@ -179,7 +179,7 @@ class RiverFlow(cliff.command.Command):
 class RiverDataBase(object):
     """Base class for EC river data site drivers.
     """
-    DATA_URL = 'http://wateroffice.ec.gc.ca/report/real_time_e.html'
+    DATA_URL = 'https://wateroffice.ec.gc.ca/report/real_time_e.html'
     DISCLAIMER_COOKIE = {'disclaimer': 'agree'}
     PARAM_IDS = {
         'discharge': 47,

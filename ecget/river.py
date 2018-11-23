@@ -92,8 +92,8 @@ class RiverFlow(cliff.command.Command):
 
     def _calc_daily_avgs(self, raw_data, end_date):
         tds = raw_data.findAll('td')
-        timestamps = (td.string for td in tds[::2])
-        flows = (td.text for td in tds[1::2])
+        timestamps = (td.string for td in tds[::3])
+        flows = (td.text for td in tds[1::3])
         data_day = self._read_datestamp(tds[0].string)
         flow_sum = count = 0
         daily_avgs = []

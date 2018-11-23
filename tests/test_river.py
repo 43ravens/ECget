@@ -81,7 +81,8 @@ def test_calc_daily_avgs_1_row(river_flow):
         <table>
           <tr>
             <td>2014-01-21 19:02:00</td>
-            <td>4200.0</td>
+            <td data-order="4200.00734274105">4,200</td>
+            <td data-order="3.89">3.89</td>
           </tr>
         </table>
     '''
@@ -95,11 +96,13 @@ def test_calc_daily_avgs_2_rows_1_day(river_flow):
         <table>
           <tr>
             <td>2014-01-21 19:02:00</td>
-            <td>4200.0</td>
+            <td data-order="4200.00734274105">4,200</td>
+            <td data-order="3.89">3.89</td>
           </tr>
           <tr>
             <td>2014-01-21 19:07:00</td>
-            <td>4400.0</td>
+            <td data-order="4399.77221395191">4,400</td>
+            <td data-order="0"></td>
           </tr>
         </table>
     '''
@@ -113,11 +116,13 @@ def test_calc_daily_avgs_2_rows_2_days(river_flow):
         <table>
           <tr>
             <td>2014-01-21 19:02:00</td>
-            <td>4200.0</td>
+            <td data-order="4200.00734274105">4,200</td>
+            <td data-order="3.89">3.89</td>
           </tr>
           <tr>
             <td>2014-01-22 19:07:00</td>
-            <td>4400.0</td>
+            <td data-order="4399.77221395191">4,400</td>
+            <td data-order="0"></td>
           </tr>
         </table>
     '''
@@ -135,11 +140,13 @@ def test_calc_daily_avgs_end_date(river_flow):
         <table>
           <tr>
             <td>2014-01-21 19:02:00</td>
-            <td>4200.0</td>
+            <td data-order="4200.00734274105">4,200</td>
+            <td data-order="3.89">3.89</td>
           </tr>
           <tr>
             <td>2014-01-22 19:07:00</td>
-            <td>4400.0</td>
+            <td data-order="4399.77221395191">4,400</td>
+            <td data-order="0"></td>
           </tr>
         </table>
     '''
@@ -209,7 +216,7 @@ def test_interpolate_missing_2_day_gap(river_flow):
         mock.call('interpolated average flow for 2014-01-23'),
         mock.call('interpolated average flow for 2014-01-24'),
     ]
-    river_flow.log.debug.call_args_list == expected
+    assert river_flow.log.debug.call_args_list == expected
     river_flow._interpolate_values.assert_called_once_with(daily_avgs, 1, 2)
 
 
@@ -235,7 +242,7 @@ def test_interpolate_missing_2_gaps(river_flow):
         mock.call('interpolated average flow for 2014-01-26'),
         mock.call('interpolated average flow for 2014-01-27'),
     ]
-    river_flow.log.debug.call_args_list == expected
+    assert river_flow.log.debug.call_args_list == expected
     expected = [
         mock.call(daily_avgs, 1, 1),
         mock.call(daily_avgs, 4, 5),

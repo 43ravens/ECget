@@ -183,6 +183,8 @@ class RiverDataBase(object):
     DISCLAIMER_COOKIE = {'disclaimer': 'agree'}
     PARAM_IDS = {
         'discharge': 47,
+        'water level': 46,
+        'water temperature': 5,
     }
 
     def __init__(self, param):
@@ -190,7 +192,7 @@ class RiverDataBase(object):
             'mode': 'Table',
             'type': 'realTime',
             'prm1': self.PARAM_IDS[param],
-            'prm2': -1,
+            'prm2': self.PARAM_IDS['water level'],
         }
 
     def get_data(self, station_id, start_date, end_date):

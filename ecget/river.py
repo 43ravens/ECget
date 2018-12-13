@@ -18,6 +18,7 @@ value(s) for SOG.
 import datetime
 import logging
 import sys
+import warnings
 
 import arrow
 import bs4
@@ -60,6 +61,18 @@ class RiverFlow(cliff.command.Command):
             help='last date to get data for; YYYY-MM-DD. '
                  'Defaults to start date.',
         )
+        parser.add_argument(
+            '--no-verify-ssl-certs',
+            dest='verify_ssl_certs',
+            action='store_false',
+            help="Don't verify SSL certificates chain for requests to "
+                 "https://wateroffice.ec.gc.ca/. "
+                 "Also suppress InsecureRequestWarning warnings from urllib3 vendored in the "
+                 "requests package. "
+                 "This is a hack to reduce the noise from cron jobs on some systems that have "
+                 "problems with the Nov-2018 forced redirection to https://wateroffice.ec.gc.ca/."
+                 "Defaults to False.",
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -69,19 +82,20 @@ class RiverFlow(cliff.command.Command):
             parsed_args.station_id,
             parsed_args.start_date,
             parsed_args.end_date,
+            parsed_args.verify_ssl_certs,
         )
         daily_avgs = self._calc_daily_avgs(raw_data, parsed_args.end_date)
         if len(daily_avgs) > 1:
             self._interpolate_missing(daily_avgs)
         self._output_results(daily_avgs)
 
-    def _get_data(self, station_id, start_date, end_date):
+    def _get_data(self, station_id, start_date, end_date, verify_ssl_certs):
         mgr = stevedore.driver.DriverManager(
             namespace='ecget.get_data',
             name='river.discharge',
             invoke_on_load=True,
         )
-        raw_data = mgr.driver.get_data(station_id, start_date, end_date)
+        raw_data = mgr.driver.get_data(station_id, start_date, end_date, verify_ssl_certs)
         msg = ('got {} river discharge data for {}'
                .format(station_id,
                        start_date.format('YYYY-MM-DD')))
@@ -195,7 +209,7 @@ class RiverDataBase(object):
             'prm2': self.PARAM_IDS['water level'],
         }
 
-    def get_data(self, station_id, start_date, end_date):
+    def get_data(self, station_id, start_date, end_date, verify_ssl_certs):
         """Get river data from the Environment Canada wateroffice.ec.gc.ca
         site.
 
@@ -218,8 +232,11 @@ class RiverDataBase(object):
             'startDate': start_date.format('YYYY-MM-DD'),
             'endDate': last_date.format('YYYY-MM-DD'),
         })
+        if not verify_ssl_certs:
+            if not sys.warnoptions:
+                warnings.simplefilter("ignore")
         response = requests.get(
-            self.DATA_URL, params=self.params, cookies=self.DISCLAIMER_COOKIE)
+            self.DATA_URL, params=self.params, cookies=self.DISCLAIMER_COOKIE, verify=verify_ssl_certs)
         soup = bs4.BeautifulSoup(response.content, 'html.parser')
         return soup.find('table')
 

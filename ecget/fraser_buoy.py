@@ -77,10 +77,13 @@ class FraserWaterQuality(cliff.command.Command):
                 setattr(data, '{}_units'.format(qty), units)
             except ValueError:
                 # No data value or units
-                logging.warning(
-                    'invalid {0} data: {1}'
-                    .format(qty, data_soup.find('span', {'id': id})
-                    .parent.text))
+                if qty != 'wind_speed':
+                    # Anemometer instrument stopped reporting in Dec-2018 and warning produce
+                    # too much email noise, so suppressed in Jan-2019
+                    logging.warning(
+                        'invalid {0} data: {1}'
+                        .format(qty, data_soup.find('span', {'id': id})
+                        .parent.text))
                 setattr(data, qty, 'n/a')
                 setattr(data, '{}_units'.format(qty), 'n/a')
             self.log.debug('{0}: {1} {2}'.format(qty, value, units))

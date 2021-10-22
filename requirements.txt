@@ -3,7 +3,7 @@
 alabaster==0.7.10
 amqp==2.1.4
 arrow==0.10.0
-Babel==2.4.0
+Babel==2.9.1
 beautifulsoup4==4.6.0
 bleach==3.3.0
 cliff==2.7.0

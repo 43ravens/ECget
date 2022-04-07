@@ -30,7 +30,7 @@ MarkupSafe==0.23
 mistune==0.8.1
 nbconvert==5.2.1
 nbformat==4.3.0
-notebook==6.4.1
+notebook==6.4.10
 pandocfilters==1.4.1
 pbr==3.0.1
 pexpect==4.2.1

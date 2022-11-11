@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""ECget command plug-in to get EC Fraser River water quality buoy data and 
+"""ECget command plug-in to get EC Fraser River water quality buoy data and
 output them as a CSV file line.
 """
 import logging
@@ -77,9 +77,11 @@ class FraserWaterQuality(cliff.command.Command):
                 setattr(data, '{}_units'.format(qty), units)
             except ValueError:
                 # No data value or units
-                if qty != 'wind_speed':
-                    # Anemometer instrument stopped reporting in Dec-2018 and warning produce
-                    # too much email noise, so suppressed in Jan-2019
+                ignore_instrument_warnings = {'wind_speed', 'water_depth'}
+                if qty not in ignore_instrument_warnings:
+                    # Suppress email warnings from instruments that we don't care about:
+                    #   * Anemometer stopped reporting for a while in Dec-2018
+                    #   * Water depth stopped reporting for a while in Nov-2022
                     logging.warning(
                         'invalid {0} data: {1}'
                         .format(qty, data_soup.find('span', {'id': id})

@@ -133,14 +133,14 @@ class FraserWaterQuality(cliff.command.Command):
 
 class FraserWaterQualityData:
     """ECget driver to get Fraser River water quality buoy data from
-    Environment Canada http://aquatic.pyr.ec.gc.ca/RealTimeBuoys/Default.aspx
+    Environment Canada https://aquatic.pyr.ec.gc.ca/realtimebuoys/default.aspx
     page.
     """
-    DATA_URL = 'http://aquatic.pyr.ec.gc.ca/RealTimeBuoys/Default.aspx'
+    DATA_URL = 'https://aquatic.pyr.ec.gc.ca/realtimebuoys/default.aspx'
 
     def get_data(self):
         """Get Fraser River water quality buoy data from Environment Canada
-        http://aquatic.pyr.ec.gc.ca/RealTimeBuoys/Default.aspx page.
+        https://aquatic.pyr.ec.gc.ca/realtimebuoys/default.aspx page.
 
         :returns: BeautifulSoup parser object containing data table
                   from EC page.
@@ -152,7 +152,7 @@ class FraserWaterQualityData:
 
 class FraserWaterQualityCSV:
     """Format Fraser River water quality buoy data from Environment Canada
-    http://aquatic.pyr.ec.gc.ca/RealTimeBuoys/Default.aspx page as a line
+    https://aquatic.pyr.ec.gc.ca/realtimebuoys/default.aspx page as a line
     to go into a CSV file.
     """
 

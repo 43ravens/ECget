@@ -63,7 +63,7 @@ class FraserWaterQuality(cliff.command.Command):
             'turbidity': 'MainContent_turbidty',
             'specific_conductivity': 'MainContent_specCond',
             'water_temperature': 'MainContent_waterTemp',
-            'dissolved_oxygen': 'MainContent_DOper',
+            'dissolved_oxygen': 'MainContent_DOmgl',
             'water_depth': 'MainContent_waterDepth',
             'wind_speed': 'MainContent_windSpeed',
             'air_temperature': 'MainContent_airTemp',

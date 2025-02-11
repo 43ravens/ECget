@@ -1,0 +1,17 @@
+version: 2
+
+build:
+  os: ubuntu-24.04
+  tools:
+    python: "mambaforge-23.11"
+
+conda:
+  environment: envs/environment-rtd.yaml
+
+sphinx:
+    builder: html
+    configuration: docs/conf.py
+    fail_on_warning: false
+
+# Only build HTML and JSON formats
+formats: []
